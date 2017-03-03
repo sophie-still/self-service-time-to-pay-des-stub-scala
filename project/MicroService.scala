@@ -5,6 +5,7 @@ import play.routes.compiler.StaticRoutesGenerator
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin._
 
 
+import play.sbt.routes.RoutesCompiler.autoImport._
 trait MicroService {
 
   import uk.gov.hmrc._
