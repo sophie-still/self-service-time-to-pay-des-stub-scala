@@ -1,3 +1,10 @@
 # microservice specific routes
 
-GET        /hello-world             uk.gov.hmrc.selfservicetimetopaydesstubscala.controllers.MicroserviceHelloWorld.hello
+GET    /sa/taxpayer/:utr/returns                                            @uk.gov.hmrc.ssttp.desstub.controllers.EligibilityStubController.generateSAReturns(utr)
+GET    /sa/taxpayer/:utr/debits                                             @uk.gov.hmrc.ssttp.desstub.controllers.EligibilityStubController.generateSADebits(utr)
+GET    /sa/taxpayer/:utr/communication-preferences                          @uk.gov.hmrc.ssttp.desstub.controllers.EligibilityStubController.generateCommPreferences(utr)
+
+POST   /time-to-pay/taxpayers/:utr/arrangements                             @uk.gov.hmrc.ssttp.desstub.controllers.ArrangementStubController.submitArrangement(utr)
+
+POST   /direct-debits/customers/:credentialId/instructions-request          @uk.gov.hmrc.ssttp.desstub.controllers.DirectDebitStubController.generateDDI(credentialId)
+POST   /direct-debits/customers/:credentialId/instructions/payment-plans    @uk.gov.hmrc.ssttp.desstub.controllers.DirectDebitStubController.generateDDIPP(credentialId)

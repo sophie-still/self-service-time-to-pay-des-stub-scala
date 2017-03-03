@@ -14,18 +14,21 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.selfservicetimetopaydesstubscala.controllers
+package uk.gov.hmrc.ssttp.desstub.controllers
 
+import javax.inject.Inject
 import uk.gov.hmrc.play.microservice.controller.BaseController
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 import play.api.mvc._
 import scala.concurrent.Future
 
-object MicroserviceHelloWorld extends MicroserviceHelloWorld
+class DirectDebitStubController @Inject()() extends BaseController {
 
-trait MicroserviceHelloWorld extends BaseController {
+  def generateDDI(credentialId: String) = Action { implicit request =>
+    Ok("Hello world")
+  }
 
-	def hello() = Action.async { implicit request =>
-		Future.successful(Ok("Hello world"))
-	}
+  def generateDDIPP(credentialId: String) = Action { implicit request =>
+    Ok("Hello world")
+  }
 }
