@@ -22,19 +22,36 @@ import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 import play.api.mvc._
 import scala.concurrent.Future
 
+import uk.gov.hmrc.ssttp.desstub.models._
+
 class ArrangementStubController @Inject()() extends ResponseHandling {
 
-  val dateValidation = "^(((19|20)([2468][048]|[13579][26]|0[48])|2000)[-]02[-]29|((19|20)[0-9]{2}[-](0[469]|11)[-](0[1-9]|1[0-9]|2[0-9]|30)|(19|20)[0-9]{2}[-](0[13578]|1[02])[-](0[1-9]|[12][0-9]|3[01])|(19|20)[0-9]{2}[-]02[-](0[1-9]|1[0-9]|2[0-8])))$";
-
   def submitArrangement(utr: String) = Action { implicit request =>
+
+    import play.api.libs.json._
+    implicit val ddReads = Json.reads[DebitDetails]    
+    implicit val ttpArrReads = Json.reads[TTPArrangement]
+    implicit val lacReads = Json.reads[LetterAndControl]            
+    implicit val arrangementReads = Json.reads[Arrangement]
+
+    def sendArrangement(arrangement: Arrangement): Result = {
+      arrangement.ttpArrangement.enforcementAction match {
+        case PreprogrammedResult(r) => r
+        case _ if !arrangement.isValid =>
+          BadRequest(stdBody("Invalid JSON message received", ""))
+        case _ => Accepted("")
+      }
+    }
+
     request.headers.get("Environment") match {
       case None => Unauthorized(stdBody("No authorization or environment header present", ""))
       case Some(_) => request.headers.get(AUTHORIZATION) match {
         case None => BadRequest(stdBody("Your submission contains one or more errors", ""))
-        case Some(_) => ???
+        case Some(_) => request.body.asJson match {
+          case Some(json) => sendArrangement(json.as[Arrangement])
+          case None => BadRequest(stdBody("Your submission contains one or more errors", ""))
+        }
       }
     }
-    Ok ("Hiya")
   }
-
 }
