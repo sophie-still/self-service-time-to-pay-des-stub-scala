@@ -20,10 +20,16 @@ import java.time.{LocalDate => Date}
 
 case class Arrangement(
   ttpArrangement: TTPArrangement,
-  letterAndControl: LetterAndControl
+  letterAndControl: Option[LetterAndControl] = None
 ) {
   def isValid: Boolean =
-    ttpArrangement.isValid && letterAndControl.isValid
+    ttpArrangement.isValid && safeLetterAndControlCheck(letterAndControl)
+  
+  def safeLetterAndControlCheck(letterAndControl: Option[LetterAndControl]): Boolean =
+    letterAndControl match {
+      case Some(lAndC) => lAndC.isValid
+      case None => true
+  }
 }
 
 case class DebitDetails (
@@ -58,26 +64,26 @@ case class TTPArrangement(
 }
 
 case class LetterAndControl (
-  customerName: String,
-  salutation: String,
-  addressLine1: String,
-  addressLine2: String,
-  addressLine3: String,
-  addressLine4: String,
-  addressLine5: String,
-  postcode: String,
-  totalAll: String,
-  clmIndicateInt: String,
-  clmPymtString: String,
-  officeName1: String,
-  officeName2: String,
-  officePostCode: String,
-  officePhone: String,
-  officeFax: String,
-  officeOpeningHours: String,
-  template: String,
-  exceptionType: String,
-  exceptionReason: String
+  customerName: Option[String],
+  salutation: Option[String],
+  addressLine1: Option[String],
+  addressLine2: Option[String],
+  addressLine3: Option[String],
+  addressLine4: Option[String],
+  addressLine5: Option[String],
+  postcode: Option[String],
+  totalAll: Option[String],
+  clmIndicateInt: Option[String],
+  clmPymtString: Option[String],
+  officeName1: Option[String],
+  officeName2: Option[String],
+  officePostCode: Option[String],
+  officePhone: Option[String],
+  officeFax: Option[String],
+  officeOpeningHours: Option[String],
+  template: Option[String],
+  exceptionType: Option[String],
+  exceptionReason: Option[String]
 ) {
   def isValid: Boolean = {
     val customerNameSalutationValidation = "^.{1,250}$"
