@@ -21,14 +21,46 @@ import uk.gov.hmrc.play.microservice.controller.BaseController
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 import play.api.mvc._
 import scala.concurrent.Future
+import play.api.libs.json._
 
-class DirectDebitStubController @Inject()() extends BaseController {
+class DirectDebitStubController @Inject()() extends ResponseHandling {
 
-  def generateDDI(credentialId: String) = Action { implicit request =>
-    Ok("Hello world")
+  def generateDDI(credentialId: String) = Action {
+    implicit request =>
+
+    val requestingService: String =
+    {request.body.asJson.get \ "requestingService"}.as[String]
+
+    if (request.headers.get("AUTHORIZATION").isEmpty)
+      Unauthorized("No authorization header present")
+    else
+      requestingService.toLowerCase match {
+        case PreprogrammedResult(r) => r
+        case _ => credentialId.toLowerCase match {
+          case "cred-id-543212300016" => Ok(JsObject{Seq(
+            "processingDate" -> JsString("2001-12-17T09:30:47Z"),
+            "directDebitInstruction" -> JsArray(Nil)
+          )})
+          case "543212300016" => Ok(JsObject{Seq(
+            "processingDate" -> JsString("2001-12-17T09:30:47Z"),
+            "directDebitInstruction" -> JsArray(Nil)
+          )})
+          case "1234567890123456" => NotFound(stdBody("BP not found", "002"))
+          case _ => Ok(Json.parse(getClass.getResourceAsStream("/DDI.json")))
+        }
+      }
   }
 
   def generateDDIPP(credentialId: String) = Action { implicit request =>
-    Ok("Hello world")
+    val requestingService: String =
+    {request.body.asJson.get \ "requestingService"}.as[String]
+
+    if (request.headers.get("AUTHORIZATION").isEmpty)
+      Unauthorized("No authorization header present")
+    else
+      requestingService.toLowerCase match {
+        case PreprogrammedResult(r) => r
+        case _ => Ok(Json.parse(getClass.getResourceAsStream("/DDIPP.json")))
+      }
   }
 }

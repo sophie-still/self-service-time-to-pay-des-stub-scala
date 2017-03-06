@@ -17,22 +17,21 @@
 package uk.gov.hmrc.ssttp.desstub.controllers
 
 import javax.inject.Inject
+import play.api.libs.json._
 import uk.gov.hmrc.play.microservice.controller.BaseController
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 import play.api.mvc._
 import scala.concurrent.Future
+import uk.gov.hmrc.ssttp.desstub.services._
 
-class EligibilityStubController @Inject()() extends BaseController {
-  def generateSAReturns(utr: String) = Action { implicit request =>
-    Ok("Hello world")
-  }
+class EligibilityStubController @Inject()() extends ResponseHandling {
 
-  def generateSADebits(utr: String) = Action { implicit request =>
-    Ok("Hello world")
-  }
+  def generateSAReturns(utr: String) =
+    serveFile("/SAReturn.json")(utr)
 
-  def generateCommPreferences(utr: String) = Action { implicit request =>
-    Ok("Hello world")
-  }
-  
+  def generateSADebits(utr: String) =
+    serveFile("/SADebit.json")(utr)
+
+  def generateCommPreferences(utr: String) =
+    serveFile("/CommPreferences.json")(utr)
 }
