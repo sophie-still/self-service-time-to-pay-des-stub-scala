@@ -51,7 +51,7 @@ trait ResponseHandling extends BaseController {
   def baseResponse(utr: String)(otherWise: => Result) = Action {
     implicit request =>
 
-    if (request.headers.get("AUTHORIZATION").isEmpty)
+    if (request.headers.get(AUTHORIZATION).isEmpty)
       Unauthorized("No authorization header present")
     else
       utr.toLowerCase match {
