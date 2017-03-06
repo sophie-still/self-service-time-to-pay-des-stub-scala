@@ -22,7 +22,6 @@ import uk.gov.hmrc.play.microservice.controller.BaseController
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 import play.api.mvc._
 import scala.concurrent.Future
-import uk.gov.hmrc.ssttp.desstub.services._
 
 class EligibilityStubController @Inject()() extends ResponseHandling {
 
