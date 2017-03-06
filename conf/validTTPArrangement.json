@@ -1,0 +1,19 @@
+{
+  "startDate": "2017-01-18",
+  "endDate": "2017-05-17",
+  "firstPaymentDate": "2017-02-18",
+  "firstPaymentAmount": "1666.67",
+  "regularPaymentAmount": "1666.67",
+  "regularPaymentFrequency": "Monthly",
+  "reviewDate": "2017-05-09",
+  "initials": "ZZZ",
+  "enforcementAction": "Distraint",
+  "directDebit": true,
+  "debitDetails": [
+    {
+      "debitType": "IN1",
+      "dueDate": "2017-11-05"
+    }
+  ],
+  "saNote": "DDI ABCDabcd1234, PP abcdefghij1234567890, First Payment Due Date 18/02/2017, First Payment £1666.67, Regular Payment £1666.67, Frequency Monthly, Final Payment £2189.26, Review Date 07/06/2017"
+}
