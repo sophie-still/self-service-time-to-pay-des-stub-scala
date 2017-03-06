@@ -22,6 +22,9 @@ import play.api.libs.json._
 
 trait ResponseHandling extends BaseController {
 
+  val yourSubmissionContainsErrors = BadRequest(
+    stdBody("Your submission contains one or more errors", ""))
+
   def serveFile(file: String)(utr: String) = baseResponse(utr) {
     val stream = getClass.getResourceAsStream(file)
     Ok(Json.parse(stream))
@@ -33,9 +36,8 @@ trait ResponseHandling extends BaseController {
       case "force400" => Some(BadRequest(stdBody("SERVICE missing or invalid", "001")))
       case "force404" => Some(NotFound(stdBody("Resource not found", "")))
       case "force500" => Some(InternalServerError(stdBody("Server Error", "")))
-      case "1234567890z" => Some(BadRequest(
-        stdBody("Your submission contains one or more errors", "")))
-      case "forceInvalidJSONFormat" => 
+      case "1234567890z" => Some(yourSubmissionContainsErrors)
+      case "forceinvalidjsonformat" => 
         Some(BadRequest(stdBody("Invalid JSON message received", "")))
       case _ => None
     }

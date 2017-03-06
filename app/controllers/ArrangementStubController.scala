@@ -37,8 +37,7 @@ class ArrangementStubController @Inject()() extends ResponseHandling {
     def sendArrangement(arrangement: Arrangement): Result = {
       arrangement.ttpArrangement.enforcementAction match {
         case PreprogrammedResult(r) => r
-        case _ if !arrangement.isValid =>
-          BadRequest(stdBody("Invalid JSON message received", ""))
+        case _ if !arrangement.isValid => yourSubmissionContainsErrors
         case _ => Accepted("")
       }
     }
@@ -46,10 +45,10 @@ class ArrangementStubController @Inject()() extends ResponseHandling {
     request.headers.get("Environment") match {
       case None => Unauthorized(stdBody("No authorization or environment header present", ""))
       case Some(_) => request.headers.get(AUTHORIZATION) match {
-        case None => BadRequest(stdBody("Your submission contains one or more errors", ""))
+        case None => yourSubmissionContainsErrors
         case Some(_) => request.body.asJson match {
           case Some(json) => sendArrangement(json.as[Arrangement])
-          case None => BadRequest(stdBody("Your submission contains one or more errors", ""))
+          case None => yourSubmissionContainsErrors
         }
       }
     }
