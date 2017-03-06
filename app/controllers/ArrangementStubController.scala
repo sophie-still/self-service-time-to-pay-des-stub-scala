@@ -21,6 +21,7 @@ import uk.gov.hmrc.play.microservice.controller.BaseController
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 import play.api.mvc._
 import scala.concurrent.Future
+import play.api.Logger
 
 import uk.gov.hmrc.ssttp.desstub.models._
 
@@ -47,7 +48,16 @@ class ArrangementStubController @Inject()() extends ResponseHandling {
       case Some(_) => request.headers.get(AUTHORIZATION) match {
         case None => yourSubmissionContainsErrors
         case Some(_) => request.body.asJson match {
-          case Some(json) => sendArrangement(json.as[Arrangement])
+          case Some(json) => json.validate[Arrangement] match {
+            case s: JsSuccess[Arrangement] => sendArrangement(s.get)
+            case JsError(e) => {
+              Logger.warn(
+                {"JSON Validation Error " :: e.toList.map{x => x._1 + ": " + x._2}}.
+                  mkString("\n   ")
+              )
+              yourSubmissionContainsErrors
+            }
+          }
           case None => yourSubmissionContainsErrors
         }
       }
