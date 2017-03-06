@@ -17,11 +17,9 @@
 package uk.gov.hmrc.ssttp.desstub.controllers
 
 import javax.inject.Inject
-import uk.gov.hmrc.play.microservice.controller.BaseController
-import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
-import play.api.mvc._
-import scala.concurrent.Future
+
 import play.api.libs.json._
+import play.api.mvc._
 
 class DirectDebitStubController @Inject()() extends ResponseHandling {
 
@@ -60,7 +58,7 @@ class DirectDebitStubController @Inject()() extends ResponseHandling {
     else
       requestingService.toLowerCase match {
         case PreprogrammedResult(r) => r
-        case _ => Ok(Json.parse(getClass.getResourceAsStream("/DDIPP.json")))
+        case _ => Created(Json.parse(getClass.getResourceAsStream("/DDIPP.json")))
       }
   }
 }

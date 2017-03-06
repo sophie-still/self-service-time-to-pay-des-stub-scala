@@ -17,11 +17,6 @@
 package uk.gov.hmrc.ssttp.desstub.controllers
 
 import javax.inject.Inject
-import play.api.libs.json._
-import uk.gov.hmrc.play.microservice.controller.BaseController
-import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
-import play.api.mvc._
-import scala.concurrent.Future
 
 class EligibilityStubController @Inject()() extends ResponseHandling {
 

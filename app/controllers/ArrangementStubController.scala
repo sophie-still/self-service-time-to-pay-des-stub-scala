@@ -17,12 +17,9 @@
 package uk.gov.hmrc.ssttp.desstub.controllers
 
 import javax.inject.Inject
-import uk.gov.hmrc.play.microservice.controller.BaseController
-import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
-import play.api.mvc._
-import scala.concurrent.Future
-import play.api.Logger
 
+import play.api.Logger
+import play.api.mvc._
 import uk.gov.hmrc.ssttp.desstub.models._
 
 class ArrangementStubController @Inject()() extends ResponseHandling {
@@ -30,9 +27,9 @@ class ArrangementStubController @Inject()() extends ResponseHandling {
   def submitArrangement(utr: String) = Action { implicit request =>
 
     import play.api.libs.json._
-    implicit val ddReads = Json.reads[DebitDetails]    
+    implicit val ddReads = Json.reads[DebitDetails]
     implicit val ttpArrReads = Json.reads[TTPArrangement]
-    implicit val lacReads = Json.reads[LetterAndControl]            
+    implicit val lacReads = Json.reads[LetterAndControl]
     implicit val arrangementReads = Json.reads[Arrangement]
 
     def sendArrangement(arrangement: Arrangement): Result = {
