@@ -91,13 +91,12 @@ There are several possible HTTP responses
 | 404 | | Resource not found | The remote endpoint has indicated that no data can be found | |
 | 404 | 002 | BP not found | Business Partner not found | |
 | 500 | | Server error | DES is currently experiencing problems that require live service intervention | |
-| 503 | | Service unavailable | Dependent systems are currently not responding | |
 
 For the purpose of testing, specific status codes can be triggered via the following methods:
 
 NOTE: There are two successful responses that can be obtained - One with a populated list of DirectDebitInstructions and one with an empty list.
 To receive a populated list use the example credential ID
-To receive an empty list use the credential ID 1234567890
+To receive an empty list use the credential ID 543212300016
 
 
 | Status Code           | Required Request Body Changes                           |
@@ -106,9 +105,8 @@ To receive an empty list use the credential ID 1234567890
 | 400                   | Remove either requestingService or knownFact from the request body|
 | 400                   | "requestingService" : "forceInvalidJSONFormat"                 |
 | 404                   | "requestingService" : "force404"                        |
-| 404 - 002 Reason Code | Any credential ID that does not match the example above |
+| 404 - 002 Reason Code | Credential ID : 1234567890123456 |
 | 500                   | "requestingService" : "force500"                        |
-| 503                   | "requestingService" : "force503"                        |
 
 #### POST   /direct-debits/customers/:credentialId/instructions/payment-plans
 

@@ -43,7 +43,7 @@ class DirectDebitStubController @Inject()() extends ResponseHandling {
             "processingDate" -> JsString("2001-12-17T09:30:47Z"),
             "directDebitInstruction" -> JsArray(Nil)
           )})
-          case "1234567890123456" => NotFound(stdBody("BP not found", "002"))
+          case "123456" => NotFound(stdBody("BP not found", "002"))
           case _ => Ok(Json.parse(getClass.getResourceAsStream("/DDI.json")))
         }
       }
