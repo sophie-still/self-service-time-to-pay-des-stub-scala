@@ -52,5 +52,26 @@ class DirectDebitStubControllerSpec extends PlaySpec with Results {
       bodyText mustBe "No authorization header present"
     }
 
+    "return 200 with populated ddi for generate DDI with existing details" in {
+      val result: Future[Result] = controller.generateDDI("1234567890").apply(fakeAuthRequest.withJsonBody(validExistingDDI))
+      val bodyText: String = contentAsString(result)
+      status(result) mustBe OK
+      bodyText mustBe ddiResponse
+    }
+
+    "return 200 with populated ddi for generate DDI with new details" in {
+      val result: Future[Result] = controller.generateDDI("1234567890").apply(fakeAuthRequest.withJsonBody(validNewDDI))
+      val bodyText: String = contentAsString(result)
+      status(result) mustBe OK
+      bodyText mustBe ddiResponse
+    }
+
+    "return 201 with ddipp for generate DDIPP" in {
+      val result: Future[Result] = controller.generateDDIPP("1234567890").apply(fakeAuthRequest.withJsonBody(validDDIPPRequest))
+      val bodyText: String = contentAsString(result)
+      status(result) mustBe CREATED
+      bodyText mustBe ddiPPResponse
+    }
+
   }
 }

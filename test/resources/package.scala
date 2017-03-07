@@ -29,6 +29,9 @@ package object testData {
   val saDebit = loadFile("SADebit.json")
   val commPreferences = loadFile("CommPreferences.json")
 
+  val ddiResponse = loadFile("DDI.json")
+  val ddiPPResponse = loadFile("DDIPP.json")
+
   val validArrangementSubmission = Json.parse(getClass.getResourceAsStream("/validTTPArrangement.json"))
 
   val validExistingDDI = Json.parse(getClass.getResourceAsStream("/existingDDI.json"))

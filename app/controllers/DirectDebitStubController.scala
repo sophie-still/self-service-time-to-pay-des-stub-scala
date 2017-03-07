@@ -26,15 +26,11 @@ class DirectDebitStubController @Inject()() extends ResponseHandling {
   def generateDDI(credentialId: String) = Action {
     implicit request =>
 
-    val requestingService: String =
-    {request.body.asJson.get \ "requestingService"}.as[String]
-
     if (request.headers.get("AUTHORIZATION").isEmpty)
       Unauthorized("No authorization header present")
     else
-      requestingService.toLowerCase match {
-        case PreprogrammedResult(r) => r
-        case _ => credentialId.toLowerCase match {
+        credentialId.toLowerCase match {
+          case credId if !(credId.length >= 1 && credId.length <= 25) => yourSubmissionContainsErrors
           case "cred-id-543212300016" => Ok(JsObject{Seq(
             "processingDate" -> JsString("2001-12-17T09:30:47Z"),
             "directDebitInstruction" -> JsArray(Nil)
@@ -47,17 +43,13 @@ class DirectDebitStubController @Inject()() extends ResponseHandling {
           case _ => Ok(Json.parse(getClass.getResourceAsStream("/DDI.json")))
         }
       }
-  }
 
   def generateDDIPP(credentialId: String) = Action { implicit request =>
-    val requestingService: String =
-    {request.body.asJson.get \ "requestingService"}.as[String]
-
     if (request.headers.get("AUTHORIZATION").isEmpty)
       Unauthorized("No authorization header present")
     else
-      requestingService.toLowerCase match {
-        case PreprogrammedResult(r) => r
+      credentialId.toLowerCase match {
+        case credId if !(credId.length >= 1 && credId.length <= 25) => yourSubmissionContainsErrors
         case _ => Created(Json.parse(getClass.getResourceAsStream("/DDIPP.json")))
       }
   }
