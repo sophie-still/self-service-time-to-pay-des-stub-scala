@@ -35,7 +35,7 @@ class ArrangementStubController @Inject()() extends ResponseHandling {
     def sendArrangement(arrangement: Arrangement): Result = {
       arrangement.ttpArrangement.enforcementAction match {
         case PreprogrammedResult(r) => r
-        case _ if !arrangement.isValid => yourSubmissionContainsErrors
+        case _ if !arrangement.isValid => invalidJson
         case _ => Accepted("")
       }
     }
