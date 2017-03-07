@@ -30,7 +30,6 @@ package object testData {
   val commPreferences = loadFile("CommPreferences.json")
 
   val validArrangementSubmission = Json.parse(getClass.getResourceAsStream("/validTTPArrangement.json"))
-  val arrangement = Json.fromJson[Arrangement](validArrangementSubmission)
 
   val validExistingDDI = Json.parse(getClass.getResourceAsStream("/existingDDI.json"))
   val validNewDDI = Json.parse(getClass.getResourceAsStream("/newDDI.json"))
