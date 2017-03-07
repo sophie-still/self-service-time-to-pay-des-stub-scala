@@ -30,6 +30,7 @@ package object testData {
   val commPreferences = loadFile("CommPreferences.json")
 
   val ddiResponse = loadFile("DDI.json")
+  val emptyDDIResponse = loadFile("emptyDDI.json")
   val ddiPPResponse = loadFile("DDIPP.json")
 
   val validArrangementSubmission = Json.parse(getClass.getResourceAsStream("/validTTPArrangement.json"))

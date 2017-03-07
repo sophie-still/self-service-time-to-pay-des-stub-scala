@@ -73,5 +73,19 @@ class DirectDebitStubControllerSpec extends PlaySpec with Results {
       bodyText mustBe ddiPPResponse
     }
 
+    "return 200 with empty ddi for generate DDI with existing details" in {
+      val result: Future[Result] = controller.generateDDI("543212300016").apply(fakeAuthRequest.withJsonBody(validExistingDDI))
+      val bodyText: String = contentAsString(result)
+      status(result) mustBe OK
+      bodyText mustBe emptyDDIResponse
+    }
+
+    "return 200 with empty ddi for generate DDI with new details" in {
+      val result: Future[Result] = controller.generateDDI("543212300016").apply(fakeAuthRequest.withJsonBody(validNewDDI))
+      val bodyText: String = contentAsString(result)
+      status(result) mustBe OK
+      bodyText mustBe emptyDDIResponse
+    }
+
   }
 }
