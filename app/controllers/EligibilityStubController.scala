@@ -18,14 +18,16 @@ package uk.gov.hmrc.ssttp.desstub.controllers
 
 import javax.inject.Inject
 
+import play.api.mvc.{Action, AnyContent}
+
 class EligibilityStubController @Inject()() extends ResponseHandling {
 
-  def generateSAReturns(utr: String) =
+  def generateSAReturns(utr: String): Action[AnyContent] =
     serveFile("/SAReturn.json")(utr)
 
-  def generateSADebits(utr: String) =
+  def generateSADebits(utr: String): Action[AnyContent]=
     serveFile("/SADebit.json")(utr)
 
-  def generateCommPreferences(utr: String) =
+  def generateCommPreferences(utr: String): Action[AnyContent] =
     serveFile("/CommPreferences.json")(utr)
 }

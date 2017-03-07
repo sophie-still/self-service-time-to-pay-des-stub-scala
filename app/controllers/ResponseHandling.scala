@@ -35,13 +35,8 @@ trait ResponseHandling extends BaseController {
 
   object PreprogrammedResult {
     def unapply(utr: String): Option[Result] = utr match {
-      case "0" => Some(NotFound)
-      case "force400" => Some(BadRequest(stdBody("SERVICE missing or invalid", "001")))
-      case "force404" => Some(NotFound(stdBody("Resource not found", "")))
-      case "force500" => Some(InternalServerError(stdBody("Server Error", "")))
-      case "1234567890z" => Some(yourSubmissionContainsErrors)
-      case "forceinvalidjsonformat" =>
-        Some(invalidJson)
+      case _ if !utr.matches("^[0-9]{10}$") => Some(yourSubmissionContainsErrors)
+      case "0000000000" => Some(NotFound)
       case _ => None
     }
   }
