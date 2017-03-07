@@ -1,0 +1,7 @@
+{
+  "requestingService": "SSTTP",
+  "knownFact": [{
+    "service": "CESA",
+    "value": "2435657686"
+  }]
+}

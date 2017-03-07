@@ -33,7 +33,7 @@ class ArrangementStubController @Inject()() extends ResponseHandling {
     implicit val arrangementReads = Json.reads[Arrangement]
 
     def sendArrangement(arrangement: Arrangement): Result = {
-      arrangement.ttpArrangement.enforcementAction match {
+      utr match {
         case PreprogrammedResult(r) => r
         case _ if !arrangement.isValid => invalidJson
         case _ => Accepted("")
@@ -41,7 +41,7 @@ class ArrangementStubController @Inject()() extends ResponseHandling {
     }
 
     request.headers.get("Environment") match {
-      case None => Unauthorized(stdBody("No authorization or environment header present", ""))
+      case None => Unauthorized("No authorization header present")
       case Some(_) => request.headers.get(AUTHORIZATION) match {
         case None => yourSubmissionContainsErrors
         case Some(_) => request.body.asJson match {

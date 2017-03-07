@@ -17,6 +17,7 @@
 import play.api.libs.json._
 import play.api.test.FakeRequest
 import play.api.test.Helpers.AUTHORIZATION
+import uk.gov.hmrc.ssttp.desstub.models.Arrangement
 
 import scala.io.Source
 
@@ -28,15 +29,19 @@ package object testData {
   val saDebit = loadFile("SADebit.json")
   val commPreferences = loadFile("CommPreferences.json")
 
+  val validArrangementSubmission = Json.parse(getClass.getResourceAsStream("/validTTPArrangement.json"))
+  val arrangement = Json.fromJson[Arrangement](validArrangementSubmission)
+
+  val validExistingDDI = Json.parse(getClass.getResourceAsStream("/existingDDI.json"))
+  val validNewDDI = Json.parse(getClass.getResourceAsStream("/newDDI.json"))
+
+  val validDDIPPRequest = Json.parse(getClass.getResourceAsStream("/DDIPPRequest.json"))
+
   val yourSubmissionError = "Your submission contains one or more errors"
 
   val fakeAuthRequest = FakeRequest().withHeaders(AUTHORIZATION -> "Authorised")
-
-  def stdBody(reason: String, reasonCode: String): JsObject = {
-    JsObject{Seq(
-      "reason" -> JsString(reason),
-      "reasonCode" -> JsString(reasonCode)
-    )}
-  }
+  val fakeAuthEnvironmentRequest = FakeRequest().withHeaders(
+    AUTHORIZATION -> "Authorised",
+    "Environment" -> "Environment")
 
 }

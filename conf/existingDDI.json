@@ -1,0 +1,33 @@
+{
+  "requestingService": "SSTTP",
+  "submissionDateTime": "2017-03-06T11:42:47Z",
+  "knownFact": [
+    {
+      "service": "CESA",
+      "value": "2435657686"
+    }
+  ],
+  "directDebitInstruction": {
+    "sortCode": "246512",
+    "accountNumber": "12376734",
+    "accountName": "Current",
+    "paperAuddisFlag": true,
+    "ddiRefNumber": "12345678"
+  },
+  "paymentPlan": {
+    "ppType": "Time to Pay",
+    "paymentReference": "2435657686K",
+    "hodService": "CESA",
+    "paymentCurrency": "GBP",
+    "initialPaymentAmount": "100.00",
+    "initialPaymentStartDate": "2017-03-13",
+    "scheduledPaymentAmount": "612.50",
+    "scheduledPaymentStartDate": "2017-03-20",
+    "scheduledPaymentEndDate": "2017-10-20",
+    "scheduledPaymentFrequency": "Calendar Monthly",
+    "balancingPaymentAmount": "619.51",
+    "balancingPaymentDate": "2017-10-20",
+    "totalLiability": "5007.01"
+  },
+  "printFlag": true
+}
