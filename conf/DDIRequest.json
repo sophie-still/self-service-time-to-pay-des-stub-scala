@@ -1,0 +1,13 @@
+{
+  "requestingService": "SSTTP",
+  "knownFact": [
+    {
+      "service": "CESA",
+      "value": "412345344555"
+    },
+    {
+      "service": "PAYE",
+      "value": "872635123"
+    }
+  ]
+}

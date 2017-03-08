@@ -35,14 +35,15 @@ package object testData {
 
   val validArrangementSubmission = Json.parse(getClass.getResourceAsStream("/validTTPArrangement.json"))
 
+  val ddiRequest = Json.parse(getClass.getResourceAsStream("/DDIRequest.json"))
+
   val validExistingDDI = Json.parse(getClass.getResourceAsStream("/existingDDI.json"))
   val validNewDDI = Json.parse(getClass.getResourceAsStream("/newDDI.json"))
-
-  val validDDIPPRequest = Json.parse(getClass.getResourceAsStream("/DDIPPRequest.json"))
 
   val yourSubmissionError = "Your submission contains one or more errors"
 
   val fakeAuthRequest = FakeRequest().withHeaders(AUTHORIZATION -> "Authorised")
+  val fakeEnvironmentRequest = FakeRequest().withHeaders("Environment" -> "Environment")
   val fakeAuthEnvironmentRequest = FakeRequest().withHeaders(
     AUTHORIZATION -> "Authorised",
     "Environment" -> "Environment")

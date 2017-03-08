@@ -57,7 +57,7 @@ case class TTPArrangement(
     firstPaymentAmount.matches("^[0-9]{1,11}\\.[0-9]{2}$"),
     regularPaymentFrequency.matches("Weekly|Fortnightly|Monthly|6-Monthly|12-Monthly"),
     initials.matches("^[A-Za-z]{1,3}$"),
-    enforcementAction.matches("Distraint|CCP|SP|Summary Warrant|Other|forceInvalidJSONFormat|force500|force503"),
+    enforcementAction.matches("Distraint|CCP|SP|Summary Warrant|Other"),
     debitDetails.map(_.isValid).reduce(_ && _),
     saNote.matches("^[a-zA-Z0-9\\u00a3 ,.\\/]{1,250}$")
   ).reduce(_ && _)

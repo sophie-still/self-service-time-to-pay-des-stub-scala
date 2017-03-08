@@ -41,9 +41,9 @@ class ArrangementStubController @Inject()() extends ResponseHandling {
     }
 
     request.headers.get("Environment") match {
-      case None => Unauthorized("No authorization header present")
+      case None => Unauthorized("No environment header present")
       case Some(_) => request.headers.get(AUTHORIZATION) match {
-        case None => yourSubmissionContainsErrors
+        case None => Unauthorized("No authorization header present")
         case Some(_) => request.body.asJson match {
           case Some(json) => json.validate[Arrangement] match {
             case s: JsSuccess[Arrangement] => sendArrangement(s.get)
@@ -52,7 +52,7 @@ class ArrangementStubController @Inject()() extends ResponseHandling {
                 {"JSON Validation Error " :: e.toList.map{x => x._1 + ": " + x._2}}.
                   mkString("\n   ")
               )
-              yourSubmissionContainsErrors
+              invalidJson
             }
           }
           case None => yourSubmissionContainsErrors

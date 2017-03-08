@@ -29,8 +29,15 @@ class ArrangementStubControllerSpec extends PlaySpec with Results {
   val controller = new ArrangementStubController()
 
   "Arrangement Controller" should {
+    "reject requests with no environment header for submit arrangement" in {
+      val result: Future[Result] = controller.submitArrangement("1234567890").apply(fakeAuthRequest)
+      val bodyText: String = contentAsString(result)
+      status(result) mustBe UNAUTHORIZED
+      bodyText mustBe "No environment header present"
+    }
+
     "reject requests with no authorization header for submit arrangement" in {
-      val result: Future[Result] = controller.submitArrangement("1234567890").apply(FakeRequest())
+      val result: Future[Result] = controller.submitArrangement("1234567890").apply(fakeEnvironmentRequest)
       val bodyText: String = contentAsString(result)
       status(result) mustBe UNAUTHORIZED
       bodyText mustBe "No authorization header present"

@@ -16,41 +16,91 @@
 
 package uk.gov.hmrc.ssttp.desstub.controllers
 
+import java.time.{LocalDate, LocalDateTime}
 import javax.inject.Inject
 
+import play.api.Logger
 import play.api.libs.json._
 import play.api.mvc._
+import uk.gov.hmrc.ssttp.desstub.models.{DDIPPRequest, DDIRequest, DirectDebitInstruction, KnownFact, PaymentPlan}
 
 class DirectDebitStubController @Inject()() extends ResponseHandling {
 
-  def generateDDI(credentialId: String) = Action {
-    implicit request =>
+  implicit val knownFactReads = Json.reads[KnownFact]
+  implicit val ddInstructionReads = Json.reads[DirectDebitInstruction]
 
-    if (request.headers.get("AUTHORIZATION").isEmpty)
-      Unauthorized("No authorization header present")
-    else
-        credentialId.toLowerCase match {
-          case credId if !(credId.length >= 1 && credId.length <= 25) => yourSubmissionContainsErrors
-          case "cred-id-543212300016" => Ok(JsObject{Seq(
-            "processingDate" -> JsString("2001-12-17T09:30:47Z"),
-            "directDebitInstruction" -> JsArray(Nil)
-          )})
-          case "543212300016" => Ok(JsObject{Seq(
-            "processingDate" -> JsString("2001-12-17T09:30:47Z"),
-            "directDebitInstruction" -> JsArray(Nil)
-          )})
-          case "123456" => NotFound(stdBody("BP not found", "002"))
+  implicit val paymentPlanReads = Json.reads[PaymentPlan]
+
+  implicit val ddiRequestReads = Json.reads[DDIRequest]
+  implicit val ddiPPRequestReads = Json.reads[DDIPPRequest]
+
+  def generateDDI(credentialId: String) = Action { implicit request =>
+
+    def sendDDI(dDIRequest: DDIRequest): Result = {
+      if (dDIRequest.isValid) {
+        credentialId match {
+          case "cred-id-543212300016" | "543212300016" => Ok(JsObject {
+            Seq(
+              "processingDate" -> JsString("2001-12-17T09:30:47Z"),
+              "directDebitInstruction" -> JsArray(Nil)
+            )
+          })
           case _ => Ok(Json.parse(getClass.getResourceAsStream("/DDI.json")))
         }
+      } else {
+        yourSubmissionContainsErrors
       }
+    }
 
-  def generateDDIPP(credentialId: String) = Action { implicit request =>
     if (request.headers.get("AUTHORIZATION").isEmpty)
       Unauthorized("No authorization header present")
     else
       credentialId.toLowerCase match {
         case credId if !(credId.length >= 1 && credId.length <= 25) => yourSubmissionContainsErrors
-        case _ => Created(Json.parse(getClass.getResourceAsStream("/DDIPP.json")))
+        case "0000000000" => NotFound(stdBody("BP not found", "002"))
+        case _ =>
+          request.body.asJson match {
+            case Some(json) => json.validate[DDIRequest] match {
+              case s: JsSuccess[DDIRequest] => sendDDI(s.get)
+              case JsError(e) =>
+                Logger.warn(
+                  {
+                    "JSON Validation Error " :: e.toList.map { x => x._1 + ": " + x._2 }
+                  }.mkString("\n   ")
+                )
+                yourSubmissionContainsErrors
+            }
+            case _ => yourSubmissionContainsErrors
+          }
       }
   }
+
+  def generateDDIPP(credentialId: String) = Action { implicit request =>
+
+    def sendDDIPP(ddiPPRequest: DDIPPRequest): Result = {
+      if (ddiPPRequest.isValid) Created(Json.parse(getClass.getResourceAsStream("/DDIPP.json"))) else yourSubmissionContainsErrors
+    }
+
+    if (request.headers.get("AUTHORIZATION").isEmpty)
+      Unauthorized("No authorization header present")
+    else
+      credentialId.toLowerCase match {
+        case credId if !(credId.length >= 1 && credId.length <= 25) => yourSubmissionContainsErrors
+        case _ =>
+          request.body.asJson match {
+            case Some(json) => json.validate[DDIPPRequest] match {
+              case s: JsSuccess[DDIPPRequest] => sendDDIPP(s.get)
+              case JsError(e) =>
+                Logger.warn(
+                  {
+                    "JSON Validation Error " :: e.toList.map { x => x._1 + ": " + x._2 }
+                  }.mkString("\n   ")
+                )
+                invalidJson
+            }
+            case _ => yourSubmissionContainsErrors
+          }
+      }
+  }
+
 }

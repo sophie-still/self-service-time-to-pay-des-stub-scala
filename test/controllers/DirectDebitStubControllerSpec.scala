@@ -31,60 +31,53 @@ class DirectDebitStubControllerSpec extends PlaySpec with Results {
   val controller = new DirectDebitStubController()
 
   "Direct Debit Controller" should {
-    "reject requests with no authorization header for generate DDI with existing details" in {
-      val result: Future[Result] = controller.generateDDI("1234567890").apply(FakeRequest().withJsonBody(validExistingDDI))
+    "reject requests with no authorization header for generate DDI" in {
+      val result: Future[Result] = controller.generateDDI("1234567890").apply(FakeRequest().withJsonBody(ddiRequest))
       val bodyText: String = contentAsString(result)
       status(result) mustBe UNAUTHORIZED
       bodyText mustBe "No authorization header present"
     }
 
-    "reject requests with no authorization header for generate DDI with new details" in {
-      val result: Future[Result] = controller.generateDDI("1234567890").apply(FakeRequest().withJsonBody(validNewDDI))
+    "reject requests with no authorization header for generate DDIPP with new bank details" in {
+      val result: Future[Result] = controller.generateDDIPP("1234567890").apply(FakeRequest().withJsonBody(validNewDDI))
       val bodyText: String = contentAsString(result)
       status(result) mustBe UNAUTHORIZED
       bodyText mustBe "No authorization header present"
     }
 
-    "reject requests with no authorization header for generate DDIPP" in {
-      val result: Future[Result] = controller.generateDDIPP("1234567890").apply(FakeRequest().withJsonBody(validDDIPPRequest))
+    "reject requests with no authorization header for generate DDIPP with existing bank details" in {
+      val result: Future[Result] = controller.generateDDIPP("1234567890").apply(FakeRequest().withJsonBody(validExistingDDI))
       val bodyText: String = contentAsString(result)
       status(result) mustBe UNAUTHORIZED
       bodyText mustBe "No authorization header present"
     }
 
-    "return 200 with populated ddi for generate DDI with existing details" in {
-      val result: Future[Result] = controller.generateDDI("1234567890").apply(fakeAuthRequest.withJsonBody(validExistingDDI))
+    "return 200 with populated ddi for generate DDI" in {
+      val result: Future[Result] = controller.generateDDI("1234567890").apply(fakeAuthRequest.withJsonBody(ddiRequest))
       val bodyText: String = contentAsString(result)
       status(result) mustBe OK
       bodyText mustBe ddiResponse
     }
 
-    "return 200 with populated ddi for generate DDI with new details" in {
-      val result: Future[Result] = controller.generateDDI("1234567890").apply(fakeAuthRequest.withJsonBody(validNewDDI))
+    "return 200 with empty ddi for generate DDI" in {
+      val result: Future[Result] = controller.generateDDI("543212300016").apply(fakeAuthRequest.withJsonBody(ddiRequest))
       val bodyText: String = contentAsString(result)
       status(result) mustBe OK
-      bodyText mustBe ddiResponse
+      bodyText mustBe emptyDDIResponse
     }
 
-    "return 201 with ddipp for generate DDIPP" in {
-      val result: Future[Result] = controller.generateDDIPP("1234567890").apply(fakeAuthRequest.withJsonBody(validDDIPPRequest))
+    "return 201 for generate DDIPP with new bank details" in {
+      val result: Future[Result] = controller.generateDDIPP("1234567890").apply(fakeAuthRequest.withJsonBody(validNewDDI))
       val bodyText: String = contentAsString(result)
       status(result) mustBe CREATED
       bodyText mustBe ddiPPResponse
     }
 
-    "return 200 with empty ddi for generate DDI with existing details" in {
-      val result: Future[Result] = controller.generateDDI("543212300016").apply(fakeAuthRequest.withJsonBody(validExistingDDI))
+    "return 201 for generate DDIPP with existing bank details" in {
+      val result: Future[Result] = controller.generateDDIPP("1234567890").apply(fakeAuthRequest.withJsonBody(validExistingDDI))
       val bodyText: String = contentAsString(result)
-      status(result) mustBe OK
-      bodyText mustBe emptyDDIResponse
-    }
-
-    "return 200 with empty ddi for generate DDI with new details" in {
-      val result: Future[Result] = controller.generateDDI("543212300016").apply(fakeAuthRequest.withJsonBody(validNewDDI))
-      val bodyText: String = contentAsString(result)
-      status(result) mustBe OK
-      bodyText mustBe emptyDDIResponse
+      status(result) mustBe CREATED
+      bodyText mustBe ddiPPResponse
     }
 
   }
