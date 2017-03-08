@@ -41,7 +41,7 @@ case class DirectDebitInstruction(sortCode: Option[String], accountNumber: Optio
 
 case class PaymentPlan(ppType: String, paymentReference: String,
                        hodService: String, paymentCurrency: String,
-                       initialPaymentAmount: String, initialPaymentStartDate: LocalDate,
+                       initialPaymentAmount: Option[String], initialPaymentStartDate: Option[LocalDate],
                        scheduledPaymentAmount: String, scheduledPaymentStartDate: LocalDate,
                        scheduledPaymentEndDate: LocalDate, scheduledPaymentFrequency: String,
                        balancingPaymentAmount: String, balancingPaymentDate: LocalDate,
@@ -55,7 +55,7 @@ case class PaymentPlan(ppType: String, paymentReference: String,
     paymentCurrency.matches("GBP"),
     initialPaymentAmount.matches(amountRegex),
     scheduledPaymentAmount.matches(amountRegex),
-    scheduledPaymentFrequency.matches("Weekly|CalendarMonthly|Fortnightly|FourWeekly|Quarterly|SixMonthly|Annually"),
+    scheduledPaymentFrequency.matches("Weekly|Calendar Monthly|Fortnightly|Four Weekly|Quarterly|Six Monthly|Annually"),
     balancingPaymentAmount.matches(amountRegex),
     totalLiability.matches(amountRegex)
   ).reduce(_ && _)
