@@ -20,9 +20,9 @@ import org.scalatestplus.play._
 import play.api.mvc._
 import play.api.test.Helpers._
 import play.api.test._
+import testData._
 
 import scala.concurrent.Future
-import testData._
 
 class EligibilityStubControllerSpec extends PlaySpec with Results {
 
