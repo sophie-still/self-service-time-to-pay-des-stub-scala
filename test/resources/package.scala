@@ -17,11 +17,14 @@
 import play.api.libs.json._
 import play.api.test.FakeRequest
 import play.api.test.Helpers.AUTHORIZATION
-import uk.gov.hmrc.ssttp.desstub.models.Arrangement
-
-import scala.io.Source
+import uk.gov.hmrc.ssttp.desstub.models.{Arrangement, DebitDetails, LetterAndControl, TTPArrangement}
 
 package object testData {
+
+  implicit val ddReads = Json.reads[DebitDetails]
+  implicit val ttpArrReads = Json.reads[TTPArrangement]
+  implicit val lacReads = Json.reads[LetterAndControl]
+  implicit val arrangementReads = Json.reads[Arrangement]
 
   def loadFile(file: String): String = Json.parse(getClass.getResourceAsStream(s"/$file")).toString
 
@@ -34,6 +37,8 @@ package object testData {
   val ddiPPResponse = loadFile("DDIPP.json")
 
   val validArrangementSubmission = Json.parse(getClass.getResourceAsStream("/validTTPArrangement.json"))
+  val validArrangement = Json.fromJson[Arrangement](validArrangementSubmission).get
+  val letterAndControl = validArrangement.letterAndControl.get
 
   val ddiRequest = Json.parse(getClass.getResourceAsStream("/DDIRequest.json"))
 
