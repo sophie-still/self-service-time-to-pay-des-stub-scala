@@ -38,7 +38,7 @@ case class DebitDetails (
 ) {
   def isValid: Boolean = Seq(
       debitType.matches("^[A-Z0-9]{3,4}$"),
-      dueDate.matches(dateRegex)).reduce(_ && _)
+      dueDate.matches).reduce(_ && _)
 }
 
 case class TTPArrangement(
@@ -60,13 +60,13 @@ case class TTPArrangement(
     val amountValidation = "^[0-9]{1,11}\\.[0-9]{2}$"
 
     Seq(
-      startDate.matches(dateRegex),
-      endDate.matches(dateRegex),
-      firstPaymentDate.matches(dateRegex),
+      startDate.matches,
+      endDate.matches,
+      firstPaymentDate.matches,
       firstPaymentAmount.matches(amountValidation),
       regularPaymentAmount.matches(amountValidation),
       regularPaymentFrequency.matches("Weekly|Fortnightly|Monthly|6-Monthly|12-Monthly"),
-      reviewDate.matches(dateRegex),
+      reviewDate.matches,
       initials.matches("^[A-Za-z]{1,3}$"),
       enforcementAction.matches("Distraint|CCP|SP|Summary Warrant|Other"),
       debitDetails.nonEmpty && debitDetails.map(_.isValid).reduce(_ && _),

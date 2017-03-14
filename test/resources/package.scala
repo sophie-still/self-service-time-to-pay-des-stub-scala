@@ -17,9 +17,17 @@
 import play.api.libs.json._
 import play.api.test.FakeRequest
 import play.api.test.Helpers.AUTHORIZATION
-import uk.gov.hmrc.ssttp.desstub.models.{Arrangement, DebitDetails, LetterAndControl, TTPArrangement}
+import uk.gov.hmrc.ssttp.desstub.models.{Arrangement, DDIPPRequest, DDIRequest, DebitDetails, DirectDebitInstruction, KnownFact, LetterAndControl, PaymentPlan, TTPArrangement}
 
 package object testData {
+
+  implicit val knownFactReads = Json.reads[KnownFact]
+  implicit val ddInstructionReads = Json.reads[DirectDebitInstruction]
+
+  implicit val paymentPlanReads = Json.reads[PaymentPlan]
+
+  implicit val ddiRequestReads = Json.reads[DDIRequest]
+  implicit val ddiPPRequestReads = Json.reads[DDIPPRequest]
 
   implicit val ddReads = Json.reads[DebitDetails]
   implicit val ttpArrReads = Json.reads[TTPArrangement]
@@ -40,10 +48,12 @@ package object testData {
   val validArrangement = Json.fromJson[Arrangement](validArrangementSubmission).get
   val letterAndControl = validArrangement.letterAndControl.get
 
-  val ddiRequest = Json.parse(getClass.getResourceAsStream("/DDIRequest.json"))
+  val ddiRequestJson = Json.parse(getClass.getResourceAsStream("/DDIRequest.json"))
+  val ddiRequest = Json.fromJson[DDIRequest](ddiRequestJson).get
 
   val validExistingDDI = Json.parse(getClass.getResourceAsStream("/existingDDI.json"))
-  val validNewDDI = Json.parse(getClass.getResourceAsStream("/newDDI.json"))
+  val validNewDDIJson = Json.parse(getClass.getResourceAsStream("/newDDI.json"))
+  val validNewDDI = Json.fromJson[DDIPPRequest](validNewDDIJson).get
 
   val yourSubmissionError = "Your submission contains one or more errors"
 
