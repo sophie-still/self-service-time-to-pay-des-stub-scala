@@ -22,10 +22,12 @@ case class DDIPPRequest(requestingService: String, submissionDateTime: LocalDate
                         knownFact: List[KnownFact], directDebitInstruction: DirectDebitInstruction,
                         paymentPlan: PaymentPlan, printFlag: Boolean) {
 
-  def isValid: Boolean = {
-    requestingService.matches("^[A-Z]{1,40}$") && knownFact.map(fact => fact.isValid).reduce(_ && _) && directDebitInstruction.isValid
-  }
-
+  def isValid: Boolean = Seq(
+    requestingService.matches("^[A-Z]{1,40}$"),
+    knownFact.nonEmpty && knownFact.map(fact => fact.isValid).reduce(_ && _),
+    directDebitInstruction.isValid,
+    paymentPlan.isValid
+  ).reduce(_ && _)
 }
 
 case class DirectDebitInstruction(sortCode: Option[String], accountNumber: Option[String], accountName: Option[String],
@@ -54,10 +56,16 @@ case class PaymentPlan(ppType: String, paymentReference: String,
     hodService.matches("CESA|NTC|PAYE|COTA|SDLT|VAT|NIQB|NIDN|MISC"),
     paymentCurrency.matches("GBP"),
     initialPaymentAmount.matches(amountRegex),
+    initialPaymentStartDate.matches,
     scheduledPaymentAmount.matches(amountRegex),
+    scheduledPaymentStartDate.matches,
+    scheduledPaymentEndDate.matches,
     scheduledPaymentFrequency.matches("Weekly|Calendar Monthly|Fortnightly|Four Weekly|Quarterly|Six Monthly|Annually"),
     balancingPaymentAmount.matches(amountRegex),
-    totalLiability.matches(amountRegex)
+    balancingPaymentDate.matches,
+    totalLiability.matches(amountRegex),
+    suspensionStartDate.matches,
+    suspensionEndDate.matches
   ).reduce(_ && _)
 
   private val amountRegex = "^([0-9]{1,16}|[0-9]{1,14}\\.[0-9]{1}|[0-9]{1,13}\\.[0-9]{2})$"

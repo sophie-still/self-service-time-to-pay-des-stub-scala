@@ -36,7 +36,9 @@ case class DebitDetails (
   debitType: String,
   dueDate: Date
 ) {
-  def isValid: Boolean = debitType.matches("^[A-Z0-9]{3,4}$")
+  def isValid: Boolean = Seq(
+      debitType.matches("^[A-Z0-9]{3,4}$"),
+      dueDate.matches).reduce(_ && _)
 }
 
 case class TTPArrangement(
@@ -53,14 +55,24 @@ case class TTPArrangement(
   debitDetails: List[DebitDetails],
   saNote: String
 ) {
-  def isValid: Boolean = Seq(
-    firstPaymentAmount.matches("^[0-9]{1,11}\\.[0-9]{2}$"),
-    regularPaymentFrequency.matches("Weekly|Fortnightly|Monthly|6-Monthly|12-Monthly"),
-    initials.matches("^[A-Za-z]{1,3}$"),
-    enforcementAction.matches("Distraint|CCP|SP|Summary Warrant|Other"),
-    debitDetails.map(_.isValid).reduce(_ && _),
-    saNote.matches("^[a-zA-Z0-9\\u00a3 ,.\\/]{1,250}$")
-  ).reduce(_ && _)
+  def isValid: Boolean = {
+
+    val amountValidation = "^[0-9]{1,11}\\.[0-9]{2}$"
+
+    Seq(
+      startDate.matches,
+      endDate.matches,
+      firstPaymentDate.matches,
+      firstPaymentAmount.matches(amountValidation),
+      regularPaymentAmount.matches(amountValidation),
+      regularPaymentFrequency.matches("Weekly|Fortnightly|Monthly|6-Monthly|12-Monthly"),
+      reviewDate.matches,
+      initials.matches("^[A-Za-z]{1,3}$"),
+      enforcementAction.matches("Distraint|CCP|SP|Summary Warrant|Other"),
+      debitDetails.nonEmpty && debitDetails.map(_.isValid).reduce(_ && _),
+      saNote.matches("^[a-zA-Z0-9\\u00a3 ,.\\/]{1,250}$")
+    ).reduce(_ && _)
+  }
 }
 
 case class LetterAndControl (

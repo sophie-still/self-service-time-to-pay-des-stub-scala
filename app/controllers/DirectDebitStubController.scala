@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.ssttp.desstub.controllers
 
-import java.time.{LocalDate, LocalDateTime}
 import javax.inject.Inject
 
 import play.api.Logger

@@ -16,30 +16,42 @@
 
 package uk.gov.hmrc.ssttp.desstub.controllers
 
+import java.time.LocalDate
+
 import org.scalatestplus.play._
-import play.api.libs.json.JsValue
+import play.api.libs.json.Json
 import play.api.mvc._
 import play.api.test.Helpers._
 import play.api.test._
+import testData._
+import uk.gov.hmrc.ssttp.desstub.models.{DDIPPRequest, DDIRequest, DirectDebitInstruction, KnownFact, PaymentPlan}
 
 import scala.concurrent.Future
-import testData._
 
 
 class DirectDebitStubControllerSpec extends PlaySpec with Results {
+
+  implicit val knownFactWrites = Json.writes[KnownFact]
+  implicit val ddInstructionWrites = Json.writes[DirectDebitInstruction]
+
+  implicit val paymentPlanWrites = Json.writes[PaymentPlan]
+
+  implicit val ddiRequestWrites = Json.writes[DDIRequest]
+  implicit val ddiPPRequestWrites = Json.writes[DDIPPRequest]
+
 
   val controller = new DirectDebitStubController()
 
   "Direct Debit Controller" should {
     "reject requests with no authorization header for generate DDI" in {
-      val result: Future[Result] = controller.generateDDI("1234567890").apply(FakeRequest().withJsonBody(ddiRequest))
+      val result: Future[Result] = controller.generateDDI("1234567890").apply(FakeRequest().withJsonBody(ddiRequestJson))
       val bodyText: String = contentAsString(result)
       status(result) mustBe UNAUTHORIZED
       bodyText mustBe "No authorization header present"
     }
 
     "reject requests with no authorization header for generate DDIPP with new bank details" in {
-      val result: Future[Result] = controller.generateDDIPP("1234567890").apply(FakeRequest().withJsonBody(validNewDDI))
+      val result: Future[Result] = controller.generateDDIPP("1234567890").apply(FakeRequest().withJsonBody(validNewDDIJson))
       val bodyText: String = contentAsString(result)
       status(result) mustBe UNAUTHORIZED
       bodyText mustBe "No authorization header present"
@@ -53,21 +65,21 @@ class DirectDebitStubControllerSpec extends PlaySpec with Results {
     }
 
     "return 200 with populated ddi for generate DDI" in {
-      val result: Future[Result] = controller.generateDDI("1234567890").apply(fakeAuthRequest.withJsonBody(ddiRequest))
+      val result: Future[Result] = controller.generateDDI("1234567890").apply(fakeAuthRequest.withJsonBody(ddiRequestJson))
       val bodyText: String = contentAsString(result)
       status(result) mustBe OK
       bodyText mustBe ddiResponse
     }
 
     "return 200 with empty ddi for generate DDI" in {
-      val result: Future[Result] = controller.generateDDI("543212300016").apply(fakeAuthRequest.withJsonBody(ddiRequest))
+      val result: Future[Result] = controller.generateDDI("543212300016").apply(fakeAuthRequest.withJsonBody(ddiRequestJson))
       val bodyText: String = contentAsString(result)
       status(result) mustBe OK
       bodyText mustBe emptyDDIResponse
     }
 
     "return 201 for generate DDIPP with new bank details" in {
-      val result: Future[Result] = controller.generateDDIPP("1234567890").apply(fakeAuthRequest.withJsonBody(validNewDDI))
+      val result: Future[Result] = controller.generateDDIPP("1234567890").apply(fakeAuthRequest.withJsonBody(validNewDDIJson))
       val bodyText: String = contentAsString(result)
       status(result) mustBe CREATED
       bodyText mustBe ddiPPResponse
@@ -80,5 +92,317 @@ class DirectDebitStubControllerSpec extends PlaySpec with Results {
       bodyText mustBe ddiPPResponse
     }
 
+    "return 200 with populated DDI for generate DDI with no knownFact" in {
+      val requiredRequest = ddiRequest.copy(knownFact = None)
+      val requiredJson = Json.toJson(requiredRequest)
+
+      val result: Future[Result] = controller.generateDDI("1234567890").apply(fakeAuthRequest.withJsonBody(requiredJson))
+      val bodyText: String = contentAsString(result)
+      status(result) mustBe OK
+      bodyText mustBe ddiResponse
+    }
+
+    "return 200 with empty DDI for generate DDI with no knownFact" in {
+      val requiredRequest = ddiRequest.copy(knownFact = None)
+      val requiredJson = Json.toJson(requiredRequest)
+
+      val result: Future[Result] = controller.generateDDI("543212300016").apply(fakeAuthRequest.withJsonBody(requiredJson))
+      val bodyText: String = contentAsString(result)
+      status(result) mustBe OK
+      bodyText mustBe emptyDDIResponse
+    }
+
+    "return 200 with populated DDI for generate DDI with empty known fact list" in {
+      val requiredRequest = ddiRequest.copy(knownFact = Some(List.empty))
+      val requiredJson = Json.toJson(requiredRequest)
+
+      val result: Future[Result] = controller.generateDDI("1234567890").apply(fakeAuthRequest.withJsonBody(requiredJson))
+      val bodyText: String = contentAsString(result)
+      status(result) mustBe OK
+      bodyText mustBe ddiResponse
+    }
+
+    "return 200 with empty DDI for generate DDI with empty known fact list" in {
+      val requiredRequest = ddiRequest.copy(knownFact = Some(List.empty))
+      val requiredJson = Json.toJson(requiredRequest)
+
+      val result: Future[Result] = controller.generateDDI("543212300016").apply(fakeAuthRequest.withJsonBody(requiredJson))
+      val bodyText: String = contentAsString(result)
+      status(result) mustBe OK
+      bodyText mustBe emptyDDIResponse
+    }
+
+    "return 400 for generate DDI with invalid requestingService" in {
+      val requiredRequest = ddiRequest.copy(requestingService = "")
+      val requiredJson = Json.toJson(requiredRequest)
+
+      val result: Future[Result] = controller.generateDDI("1234567890").apply(fakeAuthRequest.withJsonBody(requiredJson))
+      val bodyText: String = contentAsString(result)
+      status(result) mustBe BAD_REQUEST
+      bodyText must include("Your submission contains one or more errors")
+    }
+
+    "return 400 for generate DDI with invalid service" in {
+      val knownFact = KnownFact("", None)
+      val requiredRequest = ddiRequest.copy(knownFact = Some(List(knownFact)))
+      val requiredJson = Json.toJson(requiredRequest)
+
+      val result: Future[Result] = controller.generateDDI("1234567890").apply(fakeAuthRequest.withJsonBody(requiredJson))
+      val bodyText: String = contentAsString(result)
+      status(result) mustBe BAD_REQUEST
+      bodyText must include("Your submission contains one or more errors")
+    }
+
+    "return 400 for generate DDI with invalid value" in {
+      val knownFact = KnownFact("CESA", Some(""))
+      val requiredRequest = ddiRequest.copy(knownFact = Some(List(knownFact)))
+      val requiredJson = Json.toJson(requiredRequest)
+
+      val result: Future[Result] = controller.generateDDI("543212300016").apply(fakeAuthRequest.withJsonBody(requiredJson))
+      val bodyText: String = contentAsString(result)
+      status(result) mustBe BAD_REQUEST
+      bodyText must include("Your submission contains one or more errors")
+    }
+
+    "return 400 for generate DDIPP with invalid requestingService" in {
+      val requiredRequest = validNewDDI.copy(requestingService = "")
+      val requiredJson = Json.toJson(requiredRequest)
+
+      val result: Future[Result] = controller.generateDDIPP("1234567890").apply(fakeAuthRequest.withJsonBody(requiredJson))
+      val bodyText: String = contentAsString(result)
+      status(result) mustBe BAD_REQUEST
+      bodyText must include("Your submission contains one or more errors")
+    }
+
+    "return 400 for generate DDIPP with invalid knownFact" in {
+      val requiredRequest = validNewDDI.copy(knownFact = List.empty)
+      val requiredJson = Json.toJson(requiredRequest)
+
+      val result: Future[Result] = controller.generateDDIPP("1234567890").apply(fakeAuthRequest.withJsonBody(requiredJson))
+      val bodyText: String = contentAsString(result)
+      status(result) mustBe BAD_REQUEST
+      bodyText must include("Your submission contains one or more errors")
+    }
+
+    "return 400 for generate DDIPP with invalid service" in {
+      val knownFact = KnownFact("", None)
+      val requiredRequest = validNewDDI.copy(knownFact = List(knownFact))
+      val requiredJson = Json.toJson(requiredRequest)
+
+      val result: Future[Result] = controller.generateDDIPP("1234567890").apply(fakeAuthRequest.withJsonBody(requiredJson))
+      val bodyText: String = contentAsString(result)
+      status(result) mustBe BAD_REQUEST
+      bodyText must include("Your submission contains one or more errors")
+    }
+
+    "return 400 for generate DDIPP with invalid value" in {
+      val knownFact = KnownFact("CESA", Some(""))
+      val requiredRequest = validNewDDI.copy(knownFact = List(knownFact))
+      val requiredJson = Json.toJson(requiredRequest)
+
+      val result: Future[Result] = controller.generateDDIPP("1234567890").apply(fakeAuthRequest.withJsonBody(requiredJson))
+      val bodyText: String = contentAsString(result)
+      status(result) mustBe BAD_REQUEST
+      bodyText must include("Your submission contains one or more errors")
+    }
+
+    "return 400 for generate DDIPP with invalid sortCode" in {
+      val ddi = validNewDDI.directDebitInstruction.copy(sortCode = Some(""))
+      val requiredRequest = validNewDDI.copy(directDebitInstruction = ddi)
+      val requiredJson = Json.toJson(requiredRequest)
+
+      val result: Future[Result] = controller.generateDDIPP("1234567890").apply(fakeAuthRequest.withJsonBody(requiredJson))
+      val bodyText: String = contentAsString(result)
+      status(result) mustBe BAD_REQUEST
+      bodyText must include("Your submission contains one or more errors")
+    }
+
+    "return 400 for generate DDIPP with invalid accountNumber" in {
+      val ddi = validNewDDI.directDebitInstruction.copy(accountNumber = Some(""))
+      val requiredRequest = validNewDDI.copy(directDebitInstruction = ddi)
+      val requiredJson = Json.toJson(requiredRequest)
+
+      val result: Future[Result] = controller.generateDDIPP("1234567890").apply(fakeAuthRequest.withJsonBody(requiredJson))
+      val bodyText: String = contentAsString(result)
+      status(result) mustBe BAD_REQUEST
+      bodyText must include("Your submission contains one or more errors")
+    }
+
+    "return 400 for generate DDIPP with invalid accountName" in {
+      val ddi = validNewDDI.directDebitInstruction.copy(accountName = Some(""))
+      val requiredRequest = validNewDDI.copy(directDebitInstruction = ddi)
+      val requiredJson = Json.toJson(requiredRequest)
+
+      val result: Future[Result] = controller.generateDDIPP("1234567890").apply(fakeAuthRequest.withJsonBody(requiredJson))
+      val bodyText: String = contentAsString(result)
+      status(result) mustBe BAD_REQUEST
+      bodyText must include("Your submission contains one or more errors")
+    }
+
+    "return 400 for generate DDIPP with invalid ddiRefNumber" in {
+      val ddi = validNewDDI.directDebitInstruction.copy(ddiRefNumber = "")
+      val requiredRequest = validNewDDI.copy(directDebitInstruction = ddi)
+      val requiredJson = Json.toJson(requiredRequest)
+
+      val result: Future[Result] = controller.generateDDIPP("1234567890").apply(fakeAuthRequest.withJsonBody(requiredJson))
+      val bodyText: String = contentAsString(result)
+      status(result) mustBe BAD_REQUEST
+      bodyText must include("Your submission contains one or more errors")
+    }
+
+    "return 400 for generate DDIPP with invalid ppType" in {
+      val paymentPlan = validNewDDI.paymentPlan.copy(ppType = "")
+      val requiredRequest = validNewDDI.copy(paymentPlan = paymentPlan)
+      val requiredJson = Json.toJson(requiredRequest)
+
+      val result: Future[Result] = controller.generateDDIPP("1234567890").apply(fakeAuthRequest.withJsonBody(requiredJson))
+      val bodyText: String = contentAsString(result)
+      status(result) mustBe BAD_REQUEST
+      bodyText must include("Your submission contains one or more errors")
+    }
+
+    "return 400 for generate DDIPP with invalid hodService" in {
+      val paymentPlan = validNewDDI.paymentPlan.copy(hodService = "")
+      val requiredRequest = validNewDDI.copy(paymentPlan = paymentPlan)
+      val requiredJson = Json.toJson(requiredRequest)
+
+      val result: Future[Result] = controller.generateDDIPP("1234567890").apply(fakeAuthRequest.withJsonBody(requiredJson))
+      val bodyText: String = contentAsString(result)
+      status(result) mustBe BAD_REQUEST
+      bodyText must include("Your submission contains one or more errors")
+    }
+
+    "return 400 for generate DDIPP with invalid paymentCurrency" in {
+      val paymentPlan = validNewDDI.paymentPlan.copy(paymentCurrency = "")
+      val requiredRequest = validNewDDI.copy(paymentPlan = paymentPlan)
+      val requiredJson = Json.toJson(requiredRequest)
+
+      val result: Future[Result] = controller.generateDDIPP("1234567890").apply(fakeAuthRequest.withJsonBody(requiredJson))
+      val bodyText: String = contentAsString(result)
+      status(result) mustBe BAD_REQUEST
+      bodyText must include("Your submission contains one or more errors")
+    }
+
+    "return 400 for generate DDIPP with invalid initialPaymentAmount" in {
+      val paymentPlan = validNewDDI.paymentPlan.copy(initialPaymentAmount = Some(""))
+      val requiredRequest = validNewDDI.copy(paymentPlan = paymentPlan)
+      val requiredJson = Json.toJson(requiredRequest)
+
+      val result: Future[Result] = controller.generateDDIPP("1234567890").apply(fakeAuthRequest.withJsonBody(requiredJson))
+      val bodyText: String = contentAsString(result)
+      status(result) mustBe BAD_REQUEST
+      bodyText must include("Your submission contains one or more errors")
+    }
+
+    "return 400 for generate DDIPP with invalid initialPaymentStartDate" in {
+      val paymentPlan = validNewDDI.paymentPlan.copy(initialPaymentStartDate = Some(LocalDate.parse("2100-01-01")))
+      val requiredRequest = validNewDDI.copy(paymentPlan = paymentPlan)
+      val requiredJson = Json.toJson(requiredRequest)
+
+      val result: Future[Result] = controller.generateDDIPP("1234567890").apply(fakeAuthRequest.withJsonBody(requiredJson))
+      val bodyText: String = contentAsString(result)
+      status(result) mustBe BAD_REQUEST
+      bodyText must include("Your submission contains one or more errors")
+    }
+
+    "return 400 for generate DDIPP with invalid scheduledPaymentAmount" in {
+      val paymentPlan = validNewDDI.paymentPlan.copy(scheduledPaymentAmount = "")
+      val requiredRequest = validNewDDI.copy(paymentPlan = paymentPlan)
+      val requiredJson = Json.toJson(requiredRequest)
+
+      val result: Future[Result] = controller.generateDDIPP("1234567890").apply(fakeAuthRequest.withJsonBody(requiredJson))
+      val bodyText: String = contentAsString(result)
+      status(result) mustBe BAD_REQUEST
+      bodyText must include("Your submission contains one or more errors")
+    }
+
+    "return 400 for generate DDIPP with invalid scheduledPaymentStartDate" in {
+      val paymentPlan = validNewDDI.paymentPlan.copy(scheduledPaymentStartDate = LocalDate.parse("2100-01-01"))
+      val requiredRequest = validNewDDI.copy(paymentPlan = paymentPlan)
+      val requiredJson = Json.toJson(requiredRequest)
+
+      val result: Future[Result] = controller.generateDDIPP("1234567890").apply(fakeAuthRequest.withJsonBody(requiredJson))
+      val bodyText: String = contentAsString(result)
+      status(result) mustBe BAD_REQUEST
+      bodyText must include("Your submission contains one or more errors")
+    }
+
+    "return 400 for generate DDIPP with invalid scheduledPaymentEndDate" in {
+      val paymentPlan = validNewDDI.paymentPlan.copy(scheduledPaymentEndDate = LocalDate.parse("2100-01-01"))
+      val requiredRequest = validNewDDI.copy(paymentPlan = paymentPlan)
+      val requiredJson = Json.toJson(requiredRequest)
+
+      val result: Future[Result] = controller.generateDDIPP("1234567890").apply(fakeAuthRequest.withJsonBody(requiredJson))
+      val bodyText: String = contentAsString(result)
+      status(result) mustBe BAD_REQUEST
+      bodyText must include("Your submission contains one or more errors")
+    }
+
+    "return 400 for generate DDIPP with invalid scheduledPaymentFrequency" in {
+      val paymentPlan = validNewDDI.paymentPlan.copy(scheduledPaymentFrequency = "")
+      val requiredRequest = validNewDDI.copy(paymentPlan = paymentPlan)
+      val requiredJson = Json.toJson(requiredRequest)
+
+      val result: Future[Result] = controller.generateDDIPP("1234567890").apply(fakeAuthRequest.withJsonBody(requiredJson))
+      val bodyText: String = contentAsString(result)
+      status(result) mustBe BAD_REQUEST
+      bodyText must include("Your submission contains one or more errors")
+    }
+
+    "return 400 for generate DDIPP with invalid balancingPaymentAmount" in {
+      val paymentPlan = validNewDDI.paymentPlan.copy(balancingPaymentAmount = "")
+      val requiredRequest = validNewDDI.copy(paymentPlan = paymentPlan)
+      val requiredJson = Json.toJson(requiredRequest)
+
+      val result: Future[Result] = controller.generateDDIPP("1234567890").apply(fakeAuthRequest.withJsonBody(requiredJson))
+      val bodyText: String = contentAsString(result)
+      status(result) mustBe BAD_REQUEST
+      bodyText must include("Your submission contains one or more errors")
+    }
+
+    "return 400 for generate DDIPP with invalid balancingPaymentDate" in {
+      val paymentPlan = validNewDDI.paymentPlan.copy(balancingPaymentDate = LocalDate.parse("2100-01-01"))
+      val requiredRequest = validNewDDI.copy(paymentPlan = paymentPlan)
+      val requiredJson = Json.toJson(requiredRequest)
+
+      val result: Future[Result] = controller.generateDDIPP("1234567890").apply(fakeAuthRequest.withJsonBody(requiredJson))
+      val bodyText: String = contentAsString(result)
+      status(result) mustBe BAD_REQUEST
+      bodyText must include("Your submission contains one or more errors")
+    }
+
+    "return 400 for generate DDIPP with invalid totalLiability" in {
+      val paymentPlan = validNewDDI.paymentPlan.copy(totalLiability = "")
+      val requiredRequest = validNewDDI.copy(paymentPlan = paymentPlan)
+      val requiredJson = Json.toJson(requiredRequest)
+
+      val result: Future[Result] = controller.generateDDIPP("1234567890").apply(fakeAuthRequest.withJsonBody(requiredJson))
+      val bodyText: String = contentAsString(result)
+      status(result) mustBe BAD_REQUEST
+      bodyText must include("Your submission contains one or more errors")
+    }
+
+    "return 400 for generate DDIPP with invalid suspensionStartDate" in {
+      val paymentPlan = validNewDDI.paymentPlan.copy(suspensionStartDate = Some(LocalDate.parse("2100-01-01")))
+      val requiredRequest = validNewDDI.copy(paymentPlan = paymentPlan)
+      val requiredJson = Json.toJson(requiredRequest)
+
+      val result: Future[Result] = controller.generateDDIPP("1234567890").apply(fakeAuthRequest.withJsonBody(requiredJson))
+      val bodyText: String = contentAsString(result)
+      status(result) mustBe BAD_REQUEST
+      bodyText must include("Your submission contains one or more errors")
+    }
+
+    "return 400 for generate DDIPP with invalid suspensionEndDate" in {
+      val paymentPlan = validNewDDI.paymentPlan.copy(suspensionEndDate = Some(LocalDate.parse("2100-01-01")))
+      val requiredRequest = validNewDDI.copy(paymentPlan = paymentPlan)
+      val requiredJson = Json.toJson(requiredRequest)
+
+      val result: Future[Result] = controller.generateDDIPP("1234567890").apply(fakeAuthRequest.withJsonBody(requiredJson))
+      val bodyText: String = contentAsString(result)
+      status(result) mustBe BAD_REQUEST
+      bodyText must include("Your submission contains one or more errors")
+    }
   }
+
 }

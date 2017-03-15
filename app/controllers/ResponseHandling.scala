@@ -16,9 +16,9 @@
 
 package uk.gov.hmrc.ssttp.desstub.controllers
 
-import uk.gov.hmrc.play.microservice.controller.BaseController
-import play.api.mvc._
 import play.api.libs.json._
+import play.api.mvc._
+import uk.gov.hmrc.play.microservice.controller.BaseController
 
 trait ResponseHandling extends BaseController {
 
