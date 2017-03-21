@@ -12,7 +12,7 @@
     {
       "taxYearEnd": "2016-04-05",
       "charge": {
-        "originCode": "IN1",
+        "originCode": "IN2",
         "creationDate": "2017-11-05"
       },
       "relevantDueDate": "2017-09-25",
