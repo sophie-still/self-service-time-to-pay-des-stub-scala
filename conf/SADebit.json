@@ -7,11 +7,16 @@
         "creationDate": "2017-11-05"
       },
       "relevantDueDate": "2017-11-05",
-      "totalOutstanding": 5000,
-      "interest": {
-        "creationDate": "2017-11-05",
-        "amount": 500
-      }
+      "totalOutstanding": 2500
+    },
+    {
+      "taxYearEnd": "2016-04-05",
+      "charge": {
+        "originCode": "IN1",
+        "creationDate": "2017-11-05"
+      },
+      "relevantDueDate": "2017-09-25",
+      "totalOutstanding": 3250
     }
   ]
 }
