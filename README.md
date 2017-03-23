@@ -12,6 +12,17 @@ This is the stub project for Direct Debit, Arrangement and Eligibility for the S
 
 [Eligibility](#eligibility)
 
+Below is a diagram which shows what the des-stub fills on for, in the SSTTP project.
+
+<a href="https://github.com/hmrc/self-service-time-to-pay-des-stub-scala">
+    <p align="center">
+      <img src="https://raw.githubusercontent.com/hmrc/self-service-time-to-pay-des-stub-scala/master/public/ServiceOverview.png" alt="ServiceOverview">
+    </p>
+</a>
+
+### Service Definitions
+The default port for this service is 8887.
+
 ## Direct Debit
 
 There are 2 endpoints available for Direct Debit. 
@@ -76,8 +87,8 @@ Example JSON responses:
 **Error Response**
 ```
 {
-    "reason": "BP not found",
-    "reasonCode": "002"
+  "reason": "BP not found",
+  "reasonCode": "002"
 }
 ```
 
@@ -120,43 +131,34 @@ An example JSON request:
 
 ```
 {
-  "requestingService": "SSTTP",
-  "submissionDateTime": "2016-07-22T09:30:47Z",
-  "knownFact": [
-    {
-      "service": "CESA",
-      "value": "123456678123123"
+    "requestingService": "SSTTP",
+    "submissionDateTime": "2017-03-06T11:42:47Z",
+    "knownFact": [
+        {
+          "service": "CESA",
+          "value": "2435657686"
+        }
+    ],
+    "directDebitInstruction": {
+      "paperAuddisFlag": true,
+      "ddiRefNumber": "000100012437"
     },
-    {
-      "service": "NTC",
-      "value": "7263817263321"
-    }
-  ],
-  "directDebitInstruction": {
-    "sortCode": "123456",
-    "accountNumber": "12345678",
-    "accountName": "Current",
-    "paperAuddisFlag": false,
-    "ddiRefNumber": "1234567890"
-  },
-  "paymentPlan": {
-    "ppType": "Time to Pay",
-    "paymentReference": "ABCDEFG12345678901",
-    "hodService": "CESA",
-    "paymentCurrency": "GBP",
-    "initialPaymentAmount": "1024.12",
-    "initialPaymentStartDate": "2001-01-01",
-    "scheduledPaymentAmount": "2763.23",
-    "scheduledPaymentStartDate": "2001-01-01",
-    "scheduledPaymentEndDate": "2001-01-01",
-    "scheduledPaymentFrequency": "Weekly",
-    "balancingPaymentAmount": "102.67",
-    "balancingPaymentDate": "2001-01-01",
-    "totalLiability": "20123.76",
-    "suspensionStartDate": "2001-01-01",
-    "suspensionEndDate": "2001-01-01"
-  },
-  "printFlag": true
+    "paymentPlan": {
+      "ppType": "Time to Pay",
+      "paymentReference": "2435657686K",
+      "hodService": "CESA",
+      "paymentCurrency": "GBP",
+      "initialPaymentAmount": "100.00",
+      "initialPaymentStartDate": "2017-03-13",
+      "scheduledPaymentAmount": "612.50",
+      "scheduledPaymentStartDate": "2017-03-20",
+      "scheduledPaymentEndDate": "2017-10-20",
+      "scheduledPaymentFrequency": "Calendar Monthly",
+      "balancingPaymentAmount": "619.51",
+      "balancingPaymentDate": "2017-10-20",
+      "totalLiability": "5007.01"
+    },
+    "printFlag": true
 }
 ```
 
@@ -189,8 +191,8 @@ Example JSON responses:
 **Error Response**
 ```
 {
-  "reason": "SERVICE missing or invalid",
-  "reasonCode": "001"
+  "reason": "Invalid JSON message received",
+  "reasonCode": ""
 }
 ```
 
@@ -232,47 +234,44 @@ An example JSON request:
 
 ```
 {
-  "ttpArrangement": {
-    "startDate": "2016-08-09",
-    "endDate": "2016-09-16",
-    "firstPaymentDate": "2016-08-09",
-    "firstPaymentAmount": "90000.00",
-    "regularPaymentAmount": "6000.00",
-    "regularPaymentFrequency": "Monthly",
-    "reviewDate": "2016-08-09",
-    "initials": "DOM",
-    "enforcementAction": "CCP",
-    "directDebit": true,
-    "debitDetails": [
-      {
-        "debitType": "IN2",
-        "dueDate": "2004-07-31"
-      }
-    ],
-    "saNote": "SA Note Text Here"
-  },
-  "letterAndControl": {
-    "customerName": "Customer Name",
-    "salutation": "Dear Sir or Madam",
-    "addressLine1": "Plaza 2",
-    "addressLine2": "Ironmasters Way",
-    "addressLine3": "Telford",
-    "addressLine4": "Shropshire",
-    "addressLine5": "UK",
-    "postCode": "TF3 4NA",
-    "totalAll": "50000",
-    "clmIndicateInt": "Interest is due",
-    "clmPymtString": "1 payment of x.xx then 11 payments of x.xx",
-    "officeName1": "office name 1",
-    "officeName2": "office name 2",
-    "officePostcode": "TF2 8JU",
-    "officePhone": "1234567",
-    "officeFax": "12345678",
-    "officeOpeningHours": "9-5",
-    "template": "template",
-    "exceptionType": "2",
-    "exceptionReason": "Customer requires Large Format printing"
-  }
+    "ttpArrangement": {
+      "startDate": "2017-03-01",
+      "endDate": "2017-06-08",
+      "firstPaymentDate": "2017-03-09",
+      "firstPaymentAmount": "1025.25",
+      "regularPaymentAmount": "1025.25",
+      "regularPaymentFrequency": "Monthly",
+      "reviewDate": "2017-05-30",
+      "initials": "ZZZ",
+      "enforcementAction": "Distraint",
+      "directDebit": true,
+      "debitDetails": [
+        {
+          "debitType": "IN1",
+          "dueDate": "2017-01-25"
+        }
+      ],
+      "saNote": "DDI 000800001012, PP 00000000000100004290, First Payment Due Date 09/03/2017, First Payment £1025.25, Regular Payment £1025.25, Frequency Monthly, Final Payment £1038.38, Review Date 29/06/2017"
+    },
+    "letterAndControl": {
+      "customerName": "SSTTPCREDID02",
+      "salutation": "Dear  SSTTPCREDID02",
+      "addressLine1": "sfsfsdfsdf",
+      "addressLine2": "79 St Marys Road",
+      "addressLine3": "Sheffield",
+      "addressLine4": "South Yorkshire",
+      "postCode": "S2 4AH",
+      "totalAll": "3075.74",
+      "clmIndicateInt": "Including interest due",
+      "clmPymtString": "Initial payment of 1025.25 then 1 payments of 1025.25 and final payment of 1038.38",
+      "officeName1": "HMRC",
+      "officeName2": "DM 440",
+      "officePostcode": "BX5 5AB",
+      "officePhone": "0300 200 3822",
+      "officeFax": "01708 707502",
+      "officeOpeningHours": "Monday - Friday 08.00 to 20.00",
+      "template": "DMTC13"
+    }
 }
 ```
 
@@ -281,8 +280,8 @@ Example JSON responses:
 **Error Response**
 ```
 {
-    "reason": "Server error",
-    "reasonCode": ""
+  "reason": "Invalid JSON message received",
+  "reasonCode": ""
 }
 ```
 
@@ -344,7 +343,7 @@ Example JSON responses:
 **Error Response**
 ```
 {
-  "reason": "Server error",
+  "reason": "Your submission contains one or more errors",
   "reasonCode": ""
 }
 ```
@@ -385,14 +384,19 @@ Example JSON responses:
       "taxYearEnd": "2016-04-05",
       "charge": {
         "originCode": "IN1",
-        "creationDate": "2015-11-05"
+        "creationDate": "2017-11-05"
       },
-      "relevantDueDate": "2015-11-05",
-      "totalOutstanding": 5000,
-      "interest": {
-        "creationDate": "2015-11-05",
-        "amount": 500
-      }
+      "relevantDueDate": "2017-11-05",
+      "totalOutstanding": 2500
+    },
+    {
+      "taxYearEnd": "2016-04-05",
+      "charge": {
+        "originCode": "IN2",
+        "creationDate": "2017-11-05"
+      },
+      "relevantDueDate": "2017-09-25",
+      "totalOutstanding": 3250
     }
   ]
 }
@@ -401,7 +405,7 @@ Example JSON responses:
 **Error Response**
 ```
 {
-  "reason": "Server error",
+  "reason": "Your submission contains one or more errors",
   "reasonCode": ""
 }
 ```
@@ -447,7 +451,7 @@ Example JSON responses:
 **Error Response**
 ```
 {
-  "reason": "Server error",
+  "reason": "Your submission contains one or more errors",
   "reasonCode": ""
 }
 ```
