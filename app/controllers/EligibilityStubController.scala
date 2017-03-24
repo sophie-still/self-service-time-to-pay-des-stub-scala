@@ -22,12 +22,21 @@ import play.api.mvc.{Action, AnyContent}
 
 class EligibilityStubController @Inject()() extends ResponseHandling {
 
+  /**
+    * Represents the getSAReturns endpoint for DES which is called by Time To Pay Taxpayer
+    */
   def generateSAReturns(utr: String): Action[AnyContent] =
     serveFile("/SAReturn.json")(utr)
 
+  /**
+    * Represents the getSADebits endpoint for DES which is called by Time To Pay Taxpayer
+    */
   def generateSADebits(utr: String): Action[AnyContent]=
     serveFile("/SADebit.json")(utr)
 
+  /**
+    * Represents the getCommPreferences endpoint for DES which is called by Time To Pay Taxpayer
+    */
   def generateCommPreferences(utr: String): Action[AnyContent] =
     serveFile("/CommPreferences.json")(utr)
 }

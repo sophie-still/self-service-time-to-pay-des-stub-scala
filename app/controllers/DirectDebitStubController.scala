@@ -33,8 +33,17 @@ class DirectDebitStubController @Inject()() extends ResponseHandling {
   implicit val ddiRequestReads = Json.reads[DDIRequest]
   implicit val ddiPPRequestReads = Json.reads[DDIPPRequest]
 
+  /**
+    * Represents the getBanks DES endpoint which is called by the Direct Debit service
+    * Carries out a number of validation checks on the data provided and returns any errors if any or
+    * Returns the list of banks if successful
+    */
   def generateDDI(credentialId: String) = Action { implicit request =>
 
+    /**
+      * Checks whether a credential id matches any specific values and returns an empty banks list
+      * Or returns a populated list if any other valid credential ids are provided
+      */
     def sendDDI(dDIRequest: DDIRequest): Result = {
       if (dDIRequest.isValid) {
         credentialId match {
@@ -74,6 +83,11 @@ class DirectDebitStubController @Inject()() extends ResponseHandling {
       }
   }
 
+  /**
+    * Represents the createPaymentPlan DES endpoint which is called by the Direct Debit service
+    * Carries out a number of validation checks on the data provided and returns any errors if any or
+    * Returns a created response if successful
+    */
   def generateDDIPP(credentialId: String) = Action { implicit request =>
 
     def sendDDIPP(ddiPPRequest: DDIPPRequest): Result = {
