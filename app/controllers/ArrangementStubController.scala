@@ -24,6 +24,11 @@ import uk.gov.hmrc.ssttp.desstub.models._
 
 class ArrangementStubController @Inject()() extends ResponseHandling {
 
+  /**
+    * Represents the ttp arrangement DES endpoint which is called by the Time To Pay Arrangement service
+    * Carries out a number of validation checks on the data provided and returns any errors if any or
+    * Returns an accepted response if successful
+    */
   def submitArrangement(utr: String) = Action { implicit request =>
 
     import play.api.libs.json._
@@ -49,9 +54,7 @@ class ArrangementStubController @Inject()() extends ResponseHandling {
             case s: JsSuccess[Arrangement] => sendArrangement(s.get)
             case JsError(e) => {
               Logger.warn(
-                {"JSON Validation Error " :: e.toList.map{x => x._1 + ": " + x._2}}.
-                  mkString("\n   ")
-              )
+                {"JSON Validation Error " :: e.toList.map{x => x._1 + ": " + x._2}}.mkString("\n   "))
               invalidJson
             }
           }

@@ -22,17 +22,26 @@ import uk.gov.hmrc.play.microservice.controller.BaseController
 
 trait ResponseHandling extends BaseController {
 
+  /**
+    * These are two generic error responses used by all of the DES endpoints
+    */
   val yourSubmissionContainsErrors = BadRequest(
     stdBody("Your submission contains one or more errors", ""))
 
   val invalidJson = BadRequest(
     stdBody("Invalid JSON message received", ""))
 
+  /**
+    * Loads the given file as a json string with an OK response
+    */
   def serveFile(file: String)(utr: String) = baseResponse(utr) {
     val stream = getClass.getResourceAsStream(file)
     Ok(Json.parse(stream))
   }
 
+  /**
+    * Checks whether a utr meets the validation requirements from DES
+    */
   object PreprogrammedResult {
     def unapply(utr: String): Option[Result] = utr match {
       case _ if !utr.matches("^[0-9]{10}$") => Some(yourSubmissionContainsErrors)
@@ -41,6 +50,9 @@ trait ResponseHandling extends BaseController {
     }
   }
 
+  /**
+    * Defines the standard body response that is returned by DES in some instances
+    */
   def stdBody(reason: String, reasonCode: String): JsObject = {
     JsObject{Seq(
       "reason" -> JsString(reason),
