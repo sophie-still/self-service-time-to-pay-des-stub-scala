@@ -30,21 +30,21 @@ class EligibilityStubControllerSpec extends PlaySpec with Results {
 
   "Eligibility Controller" should {
     "reject requests with no authorization header for sa returns" in {
-      val result: Future[Result] = controller.generateSAReturns("1234567890").apply(FakeRequest())
+      val result: Future[Result] = controller.getReturns("1234567890").apply(FakeRequest())
       val bodyText: String = contentAsString(result)
       status(result) mustBe UNAUTHORIZED
       bodyText mustBe "No authorization header present"
     }
 
     "reject requests with no authorization header for communication preferences" in {
-      val result: Future[Result] = controller.generateCommPreferences("1234567890").apply(FakeRequest())
+      val result: Future[Result] = controller.getCommunicationPreferences("1234567890").apply(FakeRequest())
       val bodyText: String = contentAsString(result)
       status(result) mustBe UNAUTHORIZED
       bodyText mustBe "No authorization header present"
     }
 
     "reject requests with no authorization header for sa debits" in {
-      val result: Future[Result] = controller.generateSADebits("1234567890").apply(FakeRequest())
+      val result: Future[Result] = controller.getDebits("1234567890").apply(FakeRequest())
       val bodyText: String = contentAsString(result)
       status(result) mustBe UNAUTHORIZED
       bodyText mustBe "No authorization header present"
@@ -52,63 +52,63 @@ class EligibilityStubControllerSpec extends PlaySpec with Results {
 
     "return 200 and sa returns for valid utr" in {
       val controller = new EligibilityStubController()
-      val result: Future[Result] = controller.generateSAReturns("1234567890").apply(fakeAuthRequest)
+      val result: Future[Result] = controller.getReturns("1234567890").apply(fakeAuthRequest)
       val bodyText: String = contentAsString(result)
       status(result) mustBe OK
       bodyText mustBe saReturn
     }
 
     "return 200 and communication preferences for valid utr" in {
-      val result: Future[Result] = controller.generateCommPreferences("1234567890").apply(fakeAuthRequest)
+      val result: Future[Result] = controller.getCommunicationPreferences("1234567890").apply(fakeAuthRequest)
       val bodyText: String = contentAsString(result)
       status(result) mustBe OK
       bodyText mustBe commPreferences
     }
 
     "return 200 and sa debits for valid utr" in {
-      val result: Future[Result] = controller.generateSADebits("1234567890").apply(fakeAuthRequest)
+      val result: Future[Result] = controller.getDebits("1234567890").apply(fakeAuthRequest)
       val bodyText: String = contentAsString(result)
       status(result) mustBe OK
       bodyText mustBe saDebit
     }
 
     "return 400 and your submission contains one or more errors with invalid utr for sa returns" in {
-      val result: Future[Result] = controller.generateSAReturns("123456789").apply(fakeAuthRequest)
+      val result: Future[Result] = controller.getReturns("123456789").apply(fakeAuthRequest)
       val bodyText: String = contentAsString(result)
       status(result) mustBe BAD_REQUEST
-      bodyText must include(yourSubmissionError)
+      bodyText must include(invalidUtrError)
     }
 
     "return 400 and your submission contains one or more errors with invalid utr for communication preferences" in {
-      val result: Future[Result] = controller.generateCommPreferences("123456789").apply(fakeAuthRequest)
+      val result: Future[Result] = controller.getCommunicationPreferences("123456789").apply(fakeAuthRequest)
       val bodyText: String = contentAsString(result)
       status(result) mustBe BAD_REQUEST
-      bodyText must include(yourSubmissionError)
+      bodyText must include(invalidUtrError)
     }
 
     "return 400 and your submission contains one or more errors with invalid utr for sa debits" in {
-      val result: Future[Result] = controller.generateSADebits("123456789").apply(fakeAuthRequest)
+      val result: Future[Result] = controller.getDebits("123456789").apply(fakeAuthRequest)
       val bodyText: String = contentAsString(result)
       status(result) mustBe BAD_REQUEST
-      bodyText must include(yourSubmissionError)
+      bodyText must include(invalidUtrError)
     }
 
     "return 404 with unknown utr for sa returns" in {
-      val result: Future[Result] = controller.generateSAReturns("0000000000").apply(fakeAuthRequest)
+      val result: Future[Result] = controller.getReturns("0000000000").apply(fakeAuthRequest)
       val bodyText: String = contentAsString(result)
       status(result) mustBe NOT_FOUND
       bodyText mustBe ""
     }
 
     "return 404 with unknown utr for communication preferences" in {
-      val result: Future[Result] = controller.generateCommPreferences("0000000000").apply(fakeAuthRequest)
+      val result: Future[Result] = controller.getCommunicationPreferences("0000000000").apply(fakeAuthRequest)
       val bodyText: String = contentAsString(result)
       status(result) mustBe NOT_FOUND
       bodyText mustBe ""
     }
 
     "return 404 with unknown utr for sa debits" in {
-      val result: Future[Result] = controller.generateSADebits("0000000000").apply(fakeAuthRequest)
+      val result: Future[Result] = controller.getDebits("0000000000").apply(fakeAuthRequest)
       val bodyText: String = contentAsString(result)
       status(result) mustBe NOT_FOUND
       bodyText mustBe ""

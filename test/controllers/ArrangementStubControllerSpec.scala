@@ -24,35 +24,33 @@ import play.api.mvc._
 import play.api.test.Helpers._
 import testData._
 import uk.gov.hmrc.ssttp.desstub.models.{Arrangement, DebitDetails, LetterAndControl, TTPArrangement}
-
+import scala.util.Random._
 import scala.concurrent.Future
 
 class ArrangementStubControllerSpec extends PlaySpec with Results {
 
-  implicit val ddWrites = Json.writes[DebitDetails]
-  implicit val ttpArrWrites = Json.writes[TTPArrangement]
-  implicit val lacWrites = Json.writes[LetterAndControl]
-  implicit val arrangementWrites = Json.writes[Arrangement]
-
   val controller = new ArrangementStubController()
+  def randomUtr = "1234567890".map(_ => nextInt(10).toString.charAt(0))
 
   "Arrangement Controller" should {
+
+
     "reject requests with no environment header for submit arrangement" in {
-      val result: Future[Result] = controller.submitArrangement("1234567890").apply(fakeAuthRequest)
+      val result: Future[Result] = controller.submitArrangement(randomUtr).apply(fakeAuthRequest)
       val bodyText: String = contentAsString(result)
       status(result) mustBe UNAUTHORIZED
       bodyText mustBe "No environment header present"
     }
 
     "reject requests with no authorization header for submit arrangement" in {
-      val result: Future[Result] = controller.submitArrangement("1234567890").apply(fakeEnvironmentRequest)
+      val result: Future[Result] = controller.submitArrangement(randomUtr).apply(fakeEnvironmentRequest)
       val bodyText: String = contentAsString(result)
       status(result) mustBe UNAUTHORIZED
       bodyText mustBe "No authorization header present"
     }
 
     "return 202 for submit arrangement with valid submission" in {
-      val result: Future[Result] = controller.submitArrangement("1234567890").apply(fakeAuthEnvironmentRequest.withJsonBody(validArrangementSubmission))
+      val result: Future[Result] = controller.submitArrangement(randomUtr).apply(fakeAuthEnvironmentRequest.withJsonBody(validArrangementSubmission))
       val bodyText: String = contentAsString(result)
       status(result) mustBe ACCEPTED
       bodyText mustBe ""
@@ -62,7 +60,7 @@ class ArrangementStubControllerSpec extends PlaySpec with Results {
       val requiredArrangement = validArrangement.copy(ttpArrangement = validArrangement.ttpArrangement.copy(startDate = LocalDate.parse("2100-01-01")))
       val arrangementJson = Json.toJson(requiredArrangement)
 
-      val result: Future[Result] = controller.submitArrangement("1234567890").apply(fakeAuthEnvironmentRequest.withJsonBody(arrangementJson))
+      val result: Future[Result] = controller.submitArrangement(randomUtr).apply(fakeAuthEnvironmentRequest.withJsonBody(arrangementJson))
       val bodyText: String = contentAsString(result)
       status(result) mustBe BAD_REQUEST
       bodyText must include("Invalid JSON message received")
@@ -72,7 +70,7 @@ class ArrangementStubControllerSpec extends PlaySpec with Results {
       val requiredArrangement = validArrangement.copy(ttpArrangement = validArrangement.ttpArrangement.copy(endDate = LocalDate.parse("2100-01-01")))
       val arrangementJson = Json.toJson(requiredArrangement)
 
-      val result: Future[Result] = controller.submitArrangement("1234567890").apply(fakeAuthEnvironmentRequest.withJsonBody(arrangementJson))
+      val result: Future[Result] = controller.submitArrangement(randomUtr).apply(fakeAuthEnvironmentRequest.withJsonBody(arrangementJson))
       val bodyText: String = contentAsString(result)
       status(result) mustBe BAD_REQUEST
       bodyText must include("Invalid JSON message received")
@@ -82,7 +80,7 @@ class ArrangementStubControllerSpec extends PlaySpec with Results {
       val requiredArrangement = validArrangement.copy(ttpArrangement = validArrangement.ttpArrangement.copy(firstPaymentDate = LocalDate.parse("2100-01-01")))
       val arrangementJson = Json.toJson(requiredArrangement)
 
-      val result: Future[Result] = controller.submitArrangement("1234567890").apply(fakeAuthEnvironmentRequest.withJsonBody(arrangementJson))
+      val result: Future[Result] = controller.submitArrangement(randomUtr).apply(fakeAuthEnvironmentRequest.withJsonBody(arrangementJson))
       val bodyText: String = contentAsString(result)
       status(result) mustBe BAD_REQUEST
       bodyText must include("Invalid JSON message received")
@@ -92,7 +90,7 @@ class ArrangementStubControllerSpec extends PlaySpec with Results {
       val requiredArrangement = validArrangement.copy(ttpArrangement = validArrangement.ttpArrangement.copy(firstPaymentAmount = "-10"))
       val arrangementJson = Json.toJson(requiredArrangement)
 
-      val result: Future[Result] = controller.submitArrangement("1234567890").apply(fakeAuthEnvironmentRequest.withJsonBody(arrangementJson))
+      val result: Future[Result] = controller.submitArrangement(randomUtr).apply(fakeAuthEnvironmentRequest.withJsonBody(arrangementJson))
       val bodyText: String = contentAsString(result)
       status(result) mustBe BAD_REQUEST
       bodyText must include("Invalid JSON message received")
@@ -102,7 +100,7 @@ class ArrangementStubControllerSpec extends PlaySpec with Results {
       val requiredArrangement = validArrangement.copy(ttpArrangement = validArrangement.ttpArrangement.copy(regularPaymentFrequency = "9-Monthly"))
       val arrangementJson = Json.toJson(requiredArrangement)
 
-      val result: Future[Result] = controller.submitArrangement("1234567890").apply(fakeAuthEnvironmentRequest.withJsonBody(arrangementJson))
+      val result: Future[Result] = controller.submitArrangement(randomUtr).apply(fakeAuthEnvironmentRequest.withJsonBody(arrangementJson))
       val bodyText: String = contentAsString(result)
       status(result) mustBe BAD_REQUEST
       bodyText must include("Invalid JSON message received")
@@ -112,7 +110,7 @@ class ArrangementStubControllerSpec extends PlaySpec with Results {
       val requiredArrangement = validArrangement.copy(ttpArrangement = validArrangement.ttpArrangement.copy(reviewDate = LocalDate.parse("2100-01-01")))
       val arrangementJson = Json.toJson(requiredArrangement)
 
-      val result: Future[Result] = controller.submitArrangement("1234567890").apply(fakeAuthEnvironmentRequest.withJsonBody(arrangementJson))
+      val result: Future[Result] = controller.submitArrangement(randomUtr).apply(fakeAuthEnvironmentRequest.withJsonBody(arrangementJson))
       val bodyText: String = contentAsString(result)
       status(result) mustBe BAD_REQUEST
       bodyText must include("Invalid JSON message received")
@@ -122,7 +120,7 @@ class ArrangementStubControllerSpec extends PlaySpec with Results {
       val requiredArrangement = validArrangement.copy(ttpArrangement = validArrangement.ttpArrangement.copy(initials = "@@@@££££---"))
       val arrangementJson = Json.toJson(requiredArrangement)
 
-      val result: Future[Result] = controller.submitArrangement("1234567890").apply(fakeAuthEnvironmentRequest.withJsonBody(arrangementJson))
+      val result: Future[Result] = controller.submitArrangement(randomUtr).apply(fakeAuthEnvironmentRequest.withJsonBody(arrangementJson))
       val bodyText: String = contentAsString(result)
       status(result) mustBe BAD_REQUEST
       bodyText must include("Invalid JSON message received")
@@ -132,7 +130,7 @@ class ArrangementStubControllerSpec extends PlaySpec with Results {
       val requiredArrangement = validArrangement.copy(ttpArrangement = validArrangement.ttpArrangement.copy(enforcementAction = "Bad Enforcement Action"))
       val arrangementJson = Json.toJson(requiredArrangement)
 
-      val result: Future[Result] = controller.submitArrangement("1234567890").apply(fakeAuthEnvironmentRequest.withJsonBody(arrangementJson))
+      val result: Future[Result] = controller.submitArrangement(randomUtr).apply(fakeAuthEnvironmentRequest.withJsonBody(arrangementJson))
       val bodyText: String = contentAsString(result)
       status(result) mustBe BAD_REQUEST
       bodyText must include("Invalid JSON message received")
@@ -142,7 +140,7 @@ class ArrangementStubControllerSpec extends PlaySpec with Results {
       val requiredArrangement = validArrangement.copy(ttpArrangement = validArrangement.ttpArrangement.copy(debitDetails = List.empty))
       val arrangementJson = Json.toJson(requiredArrangement)
 
-      val result: Future[Result] = controller.submitArrangement("1234567890").apply(fakeAuthEnvironmentRequest.withJsonBody(arrangementJson))
+      val result: Future[Result] = controller.submitArrangement(randomUtr).apply(fakeAuthEnvironmentRequest.withJsonBody(arrangementJson))
       val bodyText: String = contentAsString(result)
       status(result) mustBe BAD_REQUEST
       bodyText must include("Invalid JSON message received")
@@ -153,7 +151,7 @@ class ArrangementStubControllerSpec extends PlaySpec with Results {
       val requiredArrangement = validArrangement.copy(ttpArrangement = validArrangement.ttpArrangement.copy(debitDetails = List(debitDetails)))
       val arrangementJson = Json.toJson(requiredArrangement)
 
-      val result: Future[Result] = controller.submitArrangement("1234567890").apply(fakeAuthEnvironmentRequest.withJsonBody(arrangementJson))
+      val result: Future[Result] = controller.submitArrangement(randomUtr).apply(fakeAuthEnvironmentRequest.withJsonBody(arrangementJson))
       val bodyText: String = contentAsString(result)
       status(result) mustBe BAD_REQUEST
       bodyText must include("Invalid JSON message received")
@@ -164,7 +162,7 @@ class ArrangementStubControllerSpec extends PlaySpec with Results {
       val requiredArrangement = validArrangement.copy(ttpArrangement = validArrangement.ttpArrangement.copy(debitDetails = List(debitDetails)))
       val arrangementJson = Json.toJson(requiredArrangement)
 
-      val result: Future[Result] = controller.submitArrangement("1234567890").apply(fakeAuthEnvironmentRequest.withJsonBody(arrangementJson))
+      val result: Future[Result] = controller.submitArrangement(randomUtr).apply(fakeAuthEnvironmentRequest.withJsonBody(arrangementJson))
       val bodyText: String = contentAsString(result)
       status(result) mustBe BAD_REQUEST
       bodyText must include("Invalid JSON message received")
@@ -174,7 +172,7 @@ class ArrangementStubControllerSpec extends PlaySpec with Results {
       val requiredArrangement = validArrangement.copy(ttpArrangement = validArrangement.ttpArrangement.copy(saNote = "#####@@@@@@##]][]'']]}{}{}====++++@@@@!!!!!!!%%%^^^*(*(&(&(^**^(%(%))%)%@@~~:::>>><<<<>>.....,,,||||"))
       val arrangementJson = Json.toJson(requiredArrangement)
 
-      val result: Future[Result] = controller.submitArrangement("1234567890").apply(fakeAuthEnvironmentRequest.withJsonBody(arrangementJson))
+      val result: Future[Result] = controller.submitArrangement(randomUtr).apply(fakeAuthEnvironmentRequest.withJsonBody(arrangementJson))
       val bodyText: String = contentAsString(result)
       status(result) mustBe BAD_REQUEST
       bodyText must include("Invalid JSON message received")
@@ -185,7 +183,7 @@ class ArrangementStubControllerSpec extends PlaySpec with Results {
       val requiredArrangement = validArrangement.copy(letterAndControl = Some(requiredLetterAndControl))
       val arrangementJson = Json.toJson(requiredArrangement)
 
-      val result: Future[Result] = controller.submitArrangement("1234567890").apply(fakeAuthEnvironmentRequest.withJsonBody(arrangementJson))
+      val result: Future[Result] = controller.submitArrangement(randomUtr).apply(fakeAuthEnvironmentRequest.withJsonBody(arrangementJson))
       val bodyText: String = contentAsString(result)
       status(result) mustBe ACCEPTED
       bodyText mustBe ""
@@ -196,7 +194,7 @@ class ArrangementStubControllerSpec extends PlaySpec with Results {
       val requiredArrangement = validArrangement.copy(letterAndControl = Some(requiredLetterAndControl))
       val arrangementJson = Json.toJson(requiredArrangement)
 
-      val result: Future[Result] = controller.submitArrangement("1234567890").apply(fakeAuthEnvironmentRequest.withJsonBody(arrangementJson))
+      val result: Future[Result] = controller.submitArrangement(randomUtr).apply(fakeAuthEnvironmentRequest.withJsonBody(arrangementJson))
       val bodyText: String = contentAsString(result)
       status(result) mustBe BAD_REQUEST
       bodyText must include("Invalid JSON message received")
@@ -207,7 +205,7 @@ class ArrangementStubControllerSpec extends PlaySpec with Results {
       val requiredArrangement = validArrangement.copy(letterAndControl = Some(requiredLetterAndControl))
       val arrangementJson = Json.toJson(requiredArrangement)
 
-      val result: Future[Result] = controller.submitArrangement("1234567890").apply(fakeAuthEnvironmentRequest.withJsonBody(arrangementJson))
+      val result: Future[Result] = controller.submitArrangement(randomUtr).apply(fakeAuthEnvironmentRequest.withJsonBody(arrangementJson))
       val bodyText: String = contentAsString(result)
       status(result) mustBe ACCEPTED
       bodyText mustBe ""
@@ -218,7 +216,7 @@ class ArrangementStubControllerSpec extends PlaySpec with Results {
       val requiredArrangement = validArrangement.copy(letterAndControl = Some(requiredLetterAndControl))
       val arrangementJson = Json.toJson(requiredArrangement)
 
-      val result: Future[Result] = controller.submitArrangement("1234567890").apply(fakeAuthEnvironmentRequest.withJsonBody(arrangementJson))
+      val result: Future[Result] = controller.submitArrangement(randomUtr).apply(fakeAuthEnvironmentRequest.withJsonBody(arrangementJson))
       val bodyText: String = contentAsString(result)
       status(result) mustBe BAD_REQUEST
       bodyText must include("Invalid JSON message received")
@@ -229,7 +227,7 @@ class ArrangementStubControllerSpec extends PlaySpec with Results {
       val requiredArrangement = validArrangement.copy(letterAndControl = Some(requiredLetterAndControl))
       val arrangementJson = Json.toJson(requiredArrangement)
 
-      val result: Future[Result] = controller.submitArrangement("1234567890").apply(fakeAuthEnvironmentRequest.withJsonBody(arrangementJson))
+      val result: Future[Result] = controller.submitArrangement(randomUtr).apply(fakeAuthEnvironmentRequest.withJsonBody(arrangementJson))
       val bodyText: String = contentAsString(result)
       status(result) mustBe ACCEPTED
       bodyText mustBe ""
@@ -240,7 +238,7 @@ class ArrangementStubControllerSpec extends PlaySpec with Results {
       val requiredArrangement = validArrangement.copy(letterAndControl = Some(requiredLetterAndControl))
       val arrangementJson = Json.toJson(requiredArrangement)
 
-      val result: Future[Result] = controller.submitArrangement("1234567890").apply(fakeAuthEnvironmentRequest.withJsonBody(arrangementJson))
+      val result: Future[Result] = controller.submitArrangement(randomUtr).apply(fakeAuthEnvironmentRequest.withJsonBody(arrangementJson))
       val bodyText: String = contentAsString(result)
       status(result) mustBe BAD_REQUEST
       bodyText must include("Invalid JSON message received")
@@ -251,7 +249,7 @@ class ArrangementStubControllerSpec extends PlaySpec with Results {
       val requiredArrangement = validArrangement.copy(letterAndControl = Some(requiredLetterAndControl))
       val arrangementJson = Json.toJson(requiredArrangement)
 
-      val result: Future[Result] = controller.submitArrangement("1234567890").apply(fakeAuthEnvironmentRequest.withJsonBody(arrangementJson))
+      val result: Future[Result] = controller.submitArrangement(randomUtr).apply(fakeAuthEnvironmentRequest.withJsonBody(arrangementJson))
       val bodyText: String = contentAsString(result)
       status(result) mustBe ACCEPTED
       bodyText mustBe ""
@@ -262,7 +260,7 @@ class ArrangementStubControllerSpec extends PlaySpec with Results {
       val requiredArrangement = validArrangement.copy(letterAndControl = Some(requiredLetterAndControl))
       val arrangementJson = Json.toJson(requiredArrangement)
 
-      val result: Future[Result] = controller.submitArrangement("1234567890").apply(fakeAuthEnvironmentRequest.withJsonBody(arrangementJson))
+      val result: Future[Result] = controller.submitArrangement(randomUtr).apply(fakeAuthEnvironmentRequest.withJsonBody(arrangementJson))
       val bodyText: String = contentAsString(result)
       status(result) mustBe BAD_REQUEST
       bodyText must include("Invalid JSON message received")
@@ -273,7 +271,7 @@ class ArrangementStubControllerSpec extends PlaySpec with Results {
       val requiredArrangement = validArrangement.copy(letterAndControl = Some(requiredLetterAndControl))
       val arrangementJson = Json.toJson(requiredArrangement)
 
-      val result: Future[Result] = controller.submitArrangement("1234567890").apply(fakeAuthEnvironmentRequest.withJsonBody(arrangementJson))
+      val result: Future[Result] = controller.submitArrangement(randomUtr).apply(fakeAuthEnvironmentRequest.withJsonBody(arrangementJson))
       val bodyText: String = contentAsString(result)
       status(result) mustBe ACCEPTED
       bodyText mustBe ""
@@ -284,7 +282,7 @@ class ArrangementStubControllerSpec extends PlaySpec with Results {
       val requiredArrangement = validArrangement.copy(letterAndControl = Some(requiredLetterAndControl))
       val arrangementJson = Json.toJson(requiredArrangement)
 
-      val result: Future[Result] = controller.submitArrangement("1234567890").apply(fakeAuthEnvironmentRequest.withJsonBody(arrangementJson))
+      val result: Future[Result] = controller.submitArrangement(randomUtr).apply(fakeAuthEnvironmentRequest.withJsonBody(arrangementJson))
       val bodyText: String = contentAsString(result)
       status(result) mustBe BAD_REQUEST
       bodyText must include("Invalid JSON message received")
@@ -295,7 +293,7 @@ class ArrangementStubControllerSpec extends PlaySpec with Results {
       val requiredArrangement = validArrangement.copy(letterAndControl = Some(requiredLetterAndControl))
       val arrangementJson = Json.toJson(requiredArrangement)
 
-      val result: Future[Result] = controller.submitArrangement("1234567890").apply(fakeAuthEnvironmentRequest.withJsonBody(arrangementJson))
+      val result: Future[Result] = controller.submitArrangement(randomUtr).apply(fakeAuthEnvironmentRequest.withJsonBody(arrangementJson))
       val bodyText: String = contentAsString(result)
       status(result) mustBe ACCEPTED
       bodyText mustBe ""
@@ -306,7 +304,7 @@ class ArrangementStubControllerSpec extends PlaySpec with Results {
       val requiredArrangement = validArrangement.copy(letterAndControl = Some(requiredLetterAndControl))
       val arrangementJson = Json.toJson(requiredArrangement)
 
-      val result: Future[Result] = controller.submitArrangement("1234567890").apply(fakeAuthEnvironmentRequest.withJsonBody(arrangementJson))
+      val result: Future[Result] = controller.submitArrangement(randomUtr).apply(fakeAuthEnvironmentRequest.withJsonBody(arrangementJson))
       val bodyText: String = contentAsString(result)
       status(result) mustBe BAD_REQUEST
       bodyText must include("Invalid JSON message received")
@@ -317,7 +315,7 @@ class ArrangementStubControllerSpec extends PlaySpec with Results {
       val requiredArrangement = validArrangement.copy(letterAndControl = Some(requiredLetterAndControl))
       val arrangementJson = Json.toJson(requiredArrangement)
 
-      val result: Future[Result] = controller.submitArrangement("1234567890").apply(fakeAuthEnvironmentRequest.withJsonBody(arrangementJson))
+      val result: Future[Result] = controller.submitArrangement(randomUtr).apply(fakeAuthEnvironmentRequest.withJsonBody(arrangementJson))
       val bodyText: String = contentAsString(result)
       status(result) mustBe ACCEPTED
       bodyText mustBe ""
@@ -328,7 +326,7 @@ class ArrangementStubControllerSpec extends PlaySpec with Results {
       val requiredArrangement = validArrangement.copy(letterAndControl = Some(requiredLetterAndControl))
       val arrangementJson = Json.toJson(requiredArrangement)
 
-      val result: Future[Result] = controller.submitArrangement("1234567890").apply(fakeAuthEnvironmentRequest.withJsonBody(arrangementJson))
+      val result: Future[Result] = controller.submitArrangement(randomUtr).apply(fakeAuthEnvironmentRequest.withJsonBody(arrangementJson))
       val bodyText: String = contentAsString(result)
       status(result) mustBe BAD_REQUEST
       bodyText must include("Invalid JSON message received")
@@ -339,7 +337,7 @@ class ArrangementStubControllerSpec extends PlaySpec with Results {
       val requiredArrangement = validArrangement.copy(letterAndControl = Some(requiredLetterAndControl))
       val arrangementJson = Json.toJson(requiredArrangement)
 
-      val result: Future[Result] = controller.submitArrangement("1234567890").apply(fakeAuthEnvironmentRequest.withJsonBody(arrangementJson))
+      val result: Future[Result] = controller.submitArrangement(randomUtr).apply(fakeAuthEnvironmentRequest.withJsonBody(arrangementJson))
       val bodyText: String = contentAsString(result)
       status(result) mustBe ACCEPTED
       bodyText mustBe ""
@@ -350,7 +348,7 @@ class ArrangementStubControllerSpec extends PlaySpec with Results {
       val requiredArrangement = validArrangement.copy(letterAndControl = Some(requiredLetterAndControl))
       val arrangementJson = Json.toJson(requiredArrangement)
 
-      val result: Future[Result] = controller.submitArrangement("1234567890").apply(fakeAuthEnvironmentRequest.withJsonBody(arrangementJson))
+      val result: Future[Result] = controller.submitArrangement(randomUtr).apply(fakeAuthEnvironmentRequest.withJsonBody(arrangementJson))
       val bodyText: String = contentAsString(result)
       status(result) mustBe BAD_REQUEST
       bodyText must include("Invalid JSON message received")
@@ -361,7 +359,7 @@ class ArrangementStubControllerSpec extends PlaySpec with Results {
       val requiredArrangement = validArrangement.copy(letterAndControl = Some(requiredLetterAndControl))
       val arrangementJson = Json.toJson(requiredArrangement)
 
-      val result: Future[Result] = controller.submitArrangement("1234567890").apply(fakeAuthEnvironmentRequest.withJsonBody(arrangementJson))
+      val result: Future[Result] = controller.submitArrangement(randomUtr).apply(fakeAuthEnvironmentRequest.withJsonBody(arrangementJson))
       val bodyText: String = contentAsString(result)
       status(result) mustBe ACCEPTED
       bodyText mustBe ""
@@ -372,7 +370,7 @@ class ArrangementStubControllerSpec extends PlaySpec with Results {
       val requiredArrangement = validArrangement.copy(letterAndControl = Some(requiredLetterAndControl))
       val arrangementJson = Json.toJson(requiredArrangement)
 
-      val result: Future[Result] = controller.submitArrangement("1234567890").apply(fakeAuthEnvironmentRequest.withJsonBody(arrangementJson))
+      val result: Future[Result] = controller.submitArrangement(randomUtr).apply(fakeAuthEnvironmentRequest.withJsonBody(arrangementJson))
       val bodyText: String = contentAsString(result)
       status(result) mustBe BAD_REQUEST
       bodyText must include("Invalid JSON message received")
@@ -383,7 +381,7 @@ class ArrangementStubControllerSpec extends PlaySpec with Results {
       val requiredArrangement = validArrangement.copy(letterAndControl = Some(requiredLetterAndControl))
       val arrangementJson = Json.toJson(requiredArrangement)
 
-      val result: Future[Result] = controller.submitArrangement("1234567890").apply(fakeAuthEnvironmentRequest.withJsonBody(arrangementJson))
+      val result: Future[Result] = controller.submitArrangement(randomUtr).apply(fakeAuthEnvironmentRequest.withJsonBody(arrangementJson))
       val bodyText: String = contentAsString(result)
       status(result) mustBe ACCEPTED
       bodyText mustBe ""
@@ -394,7 +392,7 @@ class ArrangementStubControllerSpec extends PlaySpec with Results {
       val requiredArrangement = validArrangement.copy(letterAndControl = Some(requiredLetterAndControl))
       val arrangementJson = Json.toJson(requiredArrangement)
 
-      val result: Future[Result] = controller.submitArrangement("1234567890").apply(fakeAuthEnvironmentRequest.withJsonBody(arrangementJson))
+      val result: Future[Result] = controller.submitArrangement(randomUtr).apply(fakeAuthEnvironmentRequest.withJsonBody(arrangementJson))
       val bodyText: String = contentAsString(result)
       status(result) mustBe BAD_REQUEST
       bodyText must include("Invalid JSON message received")
@@ -405,7 +403,7 @@ class ArrangementStubControllerSpec extends PlaySpec with Results {
       val requiredArrangement = validArrangement.copy(letterAndControl = Some(requiredLetterAndControl))
       val arrangementJson = Json.toJson(requiredArrangement)
 
-      val result: Future[Result] = controller.submitArrangement("1234567890").apply(fakeAuthEnvironmentRequest.withJsonBody(arrangementJson))
+      val result: Future[Result] = controller.submitArrangement(randomUtr).apply(fakeAuthEnvironmentRequest.withJsonBody(arrangementJson))
       val bodyText: String = contentAsString(result)
       status(result) mustBe ACCEPTED
       bodyText mustBe ""
@@ -416,7 +414,7 @@ class ArrangementStubControllerSpec extends PlaySpec with Results {
       val requiredArrangement = validArrangement.copy(letterAndControl = Some(requiredLetterAndControl))
       val arrangementJson = Json.toJson(requiredArrangement)
 
-      val result: Future[Result] = controller.submitArrangement("1234567890").apply(fakeAuthEnvironmentRequest.withJsonBody(arrangementJson))
+      val result: Future[Result] = controller.submitArrangement(randomUtr).apply(fakeAuthEnvironmentRequest.withJsonBody(arrangementJson))
       val bodyText: String = contentAsString(result)
       status(result) mustBe BAD_REQUEST
       bodyText must include("Invalid JSON message received")
@@ -427,7 +425,7 @@ class ArrangementStubControllerSpec extends PlaySpec with Results {
       val requiredArrangement = validArrangement.copy(letterAndControl = Some(requiredLetterAndControl))
       val arrangementJson = Json.toJson(requiredArrangement)
 
-      val result: Future[Result] = controller.submitArrangement("1234567890").apply(fakeAuthEnvironmentRequest.withJsonBody(arrangementJson))
+      val result: Future[Result] = controller.submitArrangement(randomUtr).apply(fakeAuthEnvironmentRequest.withJsonBody(arrangementJson))
       val bodyText: String = contentAsString(result)
       status(result) mustBe ACCEPTED
       bodyText mustBe ""
@@ -438,7 +436,7 @@ class ArrangementStubControllerSpec extends PlaySpec with Results {
       val requiredArrangement = validArrangement.copy(letterAndControl = Some(requiredLetterAndControl))
       val arrangementJson = Json.toJson(requiredArrangement)
 
-      val result: Future[Result] = controller.submitArrangement("1234567890").apply(fakeAuthEnvironmentRequest.withJsonBody(arrangementJson))
+      val result: Future[Result] = controller.submitArrangement(randomUtr).apply(fakeAuthEnvironmentRequest.withJsonBody(arrangementJson))
       val bodyText: String = contentAsString(result)
       status(result) mustBe BAD_REQUEST
       bodyText must include("Invalid JSON message received")
@@ -449,7 +447,7 @@ class ArrangementStubControllerSpec extends PlaySpec with Results {
       val requiredArrangement = validArrangement.copy(letterAndControl = Some(requiredLetterAndControl))
       val arrangementJson = Json.toJson(requiredArrangement)
 
-      val result: Future[Result] = controller.submitArrangement("1234567890").apply(fakeAuthEnvironmentRequest.withJsonBody(arrangementJson))
+      val result: Future[Result] = controller.submitArrangement(randomUtr).apply(fakeAuthEnvironmentRequest.withJsonBody(arrangementJson))
       val bodyText: String = contentAsString(result)
       status(result) mustBe ACCEPTED
       bodyText mustBe ""
@@ -460,7 +458,7 @@ class ArrangementStubControllerSpec extends PlaySpec with Results {
       val requiredArrangement = validArrangement.copy(letterAndControl = Some(requiredLetterAndControl))
       val arrangementJson = Json.toJson(requiredArrangement)
 
-      val result: Future[Result] = controller.submitArrangement("1234567890").apply(fakeAuthEnvironmentRequest.withJsonBody(arrangementJson))
+      val result: Future[Result] = controller.submitArrangement(randomUtr).apply(fakeAuthEnvironmentRequest.withJsonBody(arrangementJson))
       val bodyText: String = contentAsString(result)
       status(result) mustBe BAD_REQUEST
       bodyText must include("Invalid JSON message received")
@@ -471,7 +469,7 @@ class ArrangementStubControllerSpec extends PlaySpec with Results {
       val requiredArrangement = validArrangement.copy(letterAndControl = Some(requiredLetterAndControl))
       val arrangementJson = Json.toJson(requiredArrangement)
 
-      val result: Future[Result] = controller.submitArrangement("1234567890").apply(fakeAuthEnvironmentRequest.withJsonBody(arrangementJson))
+      val result: Future[Result] = controller.submitArrangement(randomUtr).apply(fakeAuthEnvironmentRequest.withJsonBody(arrangementJson))
       val bodyText: String = contentAsString(result)
       status(result) mustBe ACCEPTED
       bodyText mustBe ""
@@ -482,7 +480,7 @@ class ArrangementStubControllerSpec extends PlaySpec with Results {
       val requiredArrangement = validArrangement.copy(letterAndControl = Some(requiredLetterAndControl))
       val arrangementJson = Json.toJson(requiredArrangement)
 
-      val result: Future[Result] = controller.submitArrangement("1234567890").apply(fakeAuthEnvironmentRequest.withJsonBody(arrangementJson))
+      val result: Future[Result] = controller.submitArrangement(randomUtr).apply(fakeAuthEnvironmentRequest.withJsonBody(arrangementJson))
       val bodyText: String = contentAsString(result)
       status(result) mustBe BAD_REQUEST
       bodyText must include("Invalid JSON message received")
@@ -493,7 +491,7 @@ class ArrangementStubControllerSpec extends PlaySpec with Results {
       val requiredArrangement = validArrangement.copy(letterAndControl = Some(requiredLetterAndControl))
       val arrangementJson = Json.toJson(requiredArrangement)
 
-      val result: Future[Result] = controller.submitArrangement("1234567890").apply(fakeAuthEnvironmentRequest.withJsonBody(arrangementJson))
+      val result: Future[Result] = controller.submitArrangement(randomUtr).apply(fakeAuthEnvironmentRequest.withJsonBody(arrangementJson))
       val bodyText: String = contentAsString(result)
       status(result) mustBe ACCEPTED
       bodyText mustBe ""
@@ -504,7 +502,7 @@ class ArrangementStubControllerSpec extends PlaySpec with Results {
       val requiredArrangement = validArrangement.copy(letterAndControl = Some(requiredLetterAndControl))
       val arrangementJson = Json.toJson(requiredArrangement)
 
-      val result: Future[Result] = controller.submitArrangement("1234567890").apply(fakeAuthEnvironmentRequest.withJsonBody(arrangementJson))
+      val result: Future[Result] = controller.submitArrangement(randomUtr).apply(fakeAuthEnvironmentRequest.withJsonBody(arrangementJson))
       val bodyText: String = contentAsString(result)
       status(result) mustBe BAD_REQUEST
       bodyText must include("Invalid JSON message received")
@@ -515,7 +513,7 @@ class ArrangementStubControllerSpec extends PlaySpec with Results {
       val requiredArrangement = validArrangement.copy(letterAndControl = Some(requiredLetterAndControl))
       val arrangementJson = Json.toJson(requiredArrangement)
 
-      val result: Future[Result] = controller.submitArrangement("1234567890").apply(fakeAuthEnvironmentRequest.withJsonBody(arrangementJson))
+      val result: Future[Result] = controller.submitArrangement(randomUtr).apply(fakeAuthEnvironmentRequest.withJsonBody(arrangementJson))
       val bodyText: String = contentAsString(result)
       status(result) mustBe ACCEPTED
       bodyText mustBe ""
@@ -526,7 +524,7 @@ class ArrangementStubControllerSpec extends PlaySpec with Results {
       val requiredArrangement = validArrangement.copy(letterAndControl = Some(requiredLetterAndControl))
       val arrangementJson = Json.toJson(requiredArrangement)
 
-      val result: Future[Result] = controller.submitArrangement("1234567890").apply(fakeAuthEnvironmentRequest.withJsonBody(arrangementJson))
+      val result: Future[Result] = controller.submitArrangement(randomUtr).apply(fakeAuthEnvironmentRequest.withJsonBody(arrangementJson))
       val bodyText: String = contentAsString(result)
       status(result) mustBe BAD_REQUEST
       bodyText must include("Invalid JSON message received")
@@ -537,7 +535,7 @@ class ArrangementStubControllerSpec extends PlaySpec with Results {
       val requiredArrangement = validArrangement.copy(letterAndControl = Some(requiredLetterAndControl))
       val arrangementJson = Json.toJson(requiredArrangement)
 
-      val result: Future[Result] = controller.submitArrangement("1234567890").apply(fakeAuthEnvironmentRequest.withJsonBody(arrangementJson))
+      val result: Future[Result] = controller.submitArrangement(randomUtr).apply(fakeAuthEnvironmentRequest.withJsonBody(arrangementJson))
       val bodyText: String = contentAsString(result)
       status(result) mustBe ACCEPTED
       bodyText mustBe ""
@@ -548,7 +546,7 @@ class ArrangementStubControllerSpec extends PlaySpec with Results {
       val requiredArrangement = validArrangement.copy(letterAndControl = Some(requiredLetterAndControl))
       val arrangementJson = Json.toJson(requiredArrangement)
 
-      val result: Future[Result] = controller.submitArrangement("1234567890").apply(fakeAuthEnvironmentRequest.withJsonBody(arrangementJson))
+      val result: Future[Result] = controller.submitArrangement(randomUtr).apply(fakeAuthEnvironmentRequest.withJsonBody(arrangementJson))
       val bodyText: String = contentAsString(result)
       status(result) mustBe BAD_REQUEST
       bodyText must include("Invalid JSON message received")
@@ -559,7 +557,7 @@ class ArrangementStubControllerSpec extends PlaySpec with Results {
       val requiredArrangement = validArrangement.copy(letterAndControl = Some(requiredLetterAndControl))
       val arrangementJson = Json.toJson(requiredArrangement)
 
-      val result: Future[Result] = controller.submitArrangement("1234567890").apply(fakeAuthEnvironmentRequest.withJsonBody(arrangementJson))
+      val result: Future[Result] = controller.submitArrangement(randomUtr).apply(fakeAuthEnvironmentRequest.withJsonBody(arrangementJson))
       val bodyText: String = contentAsString(result)
       status(result) mustBe ACCEPTED
       bodyText mustBe ""
@@ -570,7 +568,7 @@ class ArrangementStubControllerSpec extends PlaySpec with Results {
       val requiredArrangement = validArrangement.copy(letterAndControl = Some(requiredLetterAndControl))
       val arrangementJson = Json.toJson(requiredArrangement)
 
-      val result: Future[Result] = controller.submitArrangement("1234567890").apply(fakeAuthEnvironmentRequest.withJsonBody(arrangementJson))
+      val result: Future[Result] = controller.submitArrangement(randomUtr).apply(fakeAuthEnvironmentRequest.withJsonBody(arrangementJson))
       val bodyText: String = contentAsString(result)
       status(result) mustBe BAD_REQUEST
       bodyText must include("Invalid JSON message received")
@@ -581,7 +579,7 @@ class ArrangementStubControllerSpec extends PlaySpec with Results {
       val requiredArrangement = validArrangement.copy(letterAndControl = Some(requiredLetterAndControl))
       val arrangementJson = Json.toJson(requiredArrangement)
 
-      val result: Future[Result] = controller.submitArrangement("1234567890").apply(fakeAuthEnvironmentRequest.withJsonBody(arrangementJson))
+      val result: Future[Result] = controller.submitArrangement(randomUtr).apply(fakeAuthEnvironmentRequest.withJsonBody(arrangementJson))
       val bodyText: String = contentAsString(result)
       status(result) mustBe ACCEPTED
       bodyText mustBe ""
@@ -592,7 +590,7 @@ class ArrangementStubControllerSpec extends PlaySpec with Results {
       val requiredArrangement = validArrangement.copy(letterAndControl = Some(requiredLetterAndControl))
       val arrangementJson = Json.toJson(requiredArrangement)
 
-      val result: Future[Result] = controller.submitArrangement("1234567890").apply(fakeAuthEnvironmentRequest.withJsonBody(arrangementJson))
+      val result: Future[Result] = controller.submitArrangement(randomUtr).apply(fakeAuthEnvironmentRequest.withJsonBody(arrangementJson))
       val bodyText: String = contentAsString(result)
       status(result) mustBe BAD_REQUEST
       bodyText must include("Invalid JSON message received")
@@ -603,7 +601,7 @@ class ArrangementStubControllerSpec extends PlaySpec with Results {
       val requiredArrangement = validArrangement.copy(letterAndControl = Some(requiredLetterAndControl))
       val arrangementJson = Json.toJson(requiredArrangement)
 
-      val result: Future[Result] = controller.submitArrangement("1234567890").apply(fakeAuthEnvironmentRequest.withJsonBody(arrangementJson))
+      val result: Future[Result] = controller.submitArrangement(randomUtr).apply(fakeAuthEnvironmentRequest.withJsonBody(arrangementJson))
       val bodyText: String = contentAsString(result)
       status(result) mustBe ACCEPTED
       bodyText mustBe ""
@@ -614,7 +612,7 @@ class ArrangementStubControllerSpec extends PlaySpec with Results {
       val requiredArrangement = validArrangement.copy(letterAndControl = Some(requiredLetterAndControl))
       val arrangementJson = Json.toJson(requiredArrangement)
 
-      val result: Future[Result] = controller.submitArrangement("1234567890").apply(fakeAuthEnvironmentRequest.withJsonBody(arrangementJson))
+      val result: Future[Result] = controller.submitArrangement(randomUtr).apply(fakeAuthEnvironmentRequest.withJsonBody(arrangementJson))
       val bodyText: String = contentAsString(result)
       status(result) mustBe BAD_REQUEST
       bodyText must include("Invalid JSON message received")

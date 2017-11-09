@@ -56,6 +56,7 @@ package object testData {
   val validNewDDI = Json.fromJson[DDIPPRequest](validNewDDIJson).get
 
   val yourSubmissionError = "Your submission contains one or more errors"
+  val invalidUtrError = "Invalid UTR number"
 
   val fakeAuthRequest = FakeRequest().withHeaders(AUTHORIZATION -> "Authorised")
   val fakeEnvironmentRequest = FakeRequest().withHeaders("Environment" -> "Environment")
