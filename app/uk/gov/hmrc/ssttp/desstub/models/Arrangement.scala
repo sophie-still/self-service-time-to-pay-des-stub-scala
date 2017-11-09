@@ -18,6 +18,8 @@ package uk.gov.hmrc.ssttp.desstub.models
 
 import java.time.{LocalDate => Date}
 
+import play.api.libs.json.Json
+
 case class Arrangement(
   ttpArrangement: TTPArrangement,
   letterAndControl: Option[LetterAndControl] = None
@@ -32,6 +34,20 @@ case class Arrangement(
   }
 }
 
+object Arrangement {
+  import play.api.libs.json._
+
+  implicit val ddWrites = Json.writes[DebitDetails]
+  implicit val ttpArrWrites = Json.writes[TTPArrangement]
+  implicit val lacWrites = Json.writes[LetterAndControl]
+  implicit val arrangementWrites = Json.writes[Arrangement]
+
+
+  implicit lazy val ddReads = Json.reads[DebitDetails]
+  implicit lazy val ttpArrReads = Json.reads[TTPArrangement]
+  implicit lazy val lacReads = Json.reads[LetterAndControl]
+  implicit lazy val arrangementReads = Json.reads[Arrangement]
+}
 case class DebitDetails (
   debitType: String,
   dueDate: Date

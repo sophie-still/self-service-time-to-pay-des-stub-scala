@@ -21,9 +21,11 @@ import javax.inject.Inject
 import play.api.Logger
 import play.api.libs.json._
 import play.api.mvc._
+import uk.gov.hmrc.play.microservice.controller.BaseController
+import uk.gov.hmrc.ssttp.desstub.controllers.ResponseHandling._
 import uk.gov.hmrc.ssttp.desstub.models.{DDIPPRequest, DDIRequest, DirectDebitInstruction, KnownFact, PaymentPlan}
 
-class DirectDebitStubController @Inject()() extends ResponseHandling {
+class DirectDebitStubController @Inject()() extends BaseController {
 
   implicit val knownFactReads = Json.reads[KnownFact]
   implicit val ddInstructionReads = Json.reads[DirectDebitInstruction]
@@ -38,7 +40,7 @@ class DirectDebitStubController @Inject()() extends ResponseHandling {
     * Carries out a number of validation checks on the data provided and returns any errors if any or
     * Returns the list of banks if successful
     */
-  def generateDDI(credentialId: String) = Action { implicit request =>
+  def getInstructionsRequest(credentialId: String) = Action { implicit request =>
 
     /**
       * Checks whether a credential id matches any specific values and returns an empty banks list
@@ -65,7 +67,7 @@ class DirectDebitStubController @Inject()() extends ResponseHandling {
     else
       credentialId.toLowerCase match {
         case credId if !(credId.length >= 1 && credId.length <= 25) => yourSubmissionContainsErrors
-        case "0000000000" => NotFound(stdBody("BP not found", "002"))
+        case "0000000000" => NotFound(errorResponse("BP not found", "002"))
         case _ =>
           request.body.asJson match {
             case Some(json) => json.validate[DDIRequest] match {
