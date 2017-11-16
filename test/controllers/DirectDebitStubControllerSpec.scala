@@ -27,6 +27,7 @@ import testData._
 import uk.gov.hmrc.ssttp.desstub.models.{DDIPPRequest, DDIRequest, DirectDebitInstruction, KnownFact, PaymentPlan}
 
 import scala.concurrent.Future
+import scala.util.Random.nextInt
 
 
 class DirectDebitStubControllerSpec extends PlaySpec with Results {
@@ -41,52 +42,54 @@ class DirectDebitStubControllerSpec extends PlaySpec with Results {
 
 
   val controller = new DirectDebitStubController()
+  def randomUtr = "1234567890".map(_ => nextInt(10).toString.charAt(0))
 
   "Direct Debit Controller" should {
+
     "reject requests with no authorization header for generate DDI" in {
-      val result: Future[Result] = controller.generateDDI("1234567890").apply(FakeRequest().withJsonBody(ddiRequestJson))
+      val result: Future[Result] = controller.getInstructionsRequest(randomUtr).apply(FakeRequest().withJsonBody(ddiRequestJson))
       val bodyText: String = contentAsString(result)
       status(result) mustBe UNAUTHORIZED
       bodyText mustBe "No authorization header present"
     }
 
     "reject requests with no authorization header for generate DDIPP with new bank details" in {
-      val result: Future[Result] = controller.generateDDIPP("1234567890").apply(FakeRequest().withJsonBody(validNewDDIJson))
+      val result: Future[Result] = controller.generateDDIPP(randomUtr).apply(FakeRequest().withJsonBody(validNewDDIJson))
       val bodyText: String = contentAsString(result)
       status(result) mustBe UNAUTHORIZED
       bodyText mustBe "No authorization header present"
     }
 
     "reject requests with no authorization header for generate DDIPP with existing bank details" in {
-      val result: Future[Result] = controller.generateDDIPP("1234567890").apply(FakeRequest().withJsonBody(validExistingDDI))
+      val result: Future[Result] = controller.generateDDIPP(randomUtr).apply(FakeRequest().withJsonBody(validExistingDDI))
       val bodyText: String = contentAsString(result)
       status(result) mustBe UNAUTHORIZED
       bodyText mustBe "No authorization header present"
     }
 
     "return 200 with populated ddi for generate DDI" in {
-      val result: Future[Result] = controller.generateDDI("1234567890").apply(fakeAuthRequest.withJsonBody(ddiRequestJson))
+      val result: Future[Result] = controller.getInstructionsRequest(randomUtr).apply(fakeAuthRequest.withJsonBody(ddiRequestJson))
       val bodyText: String = contentAsString(result)
       status(result) mustBe OK
       bodyText mustBe ddiResponse
     }
 
     "return 200 with empty ddi for generate DDI" in {
-      val result: Future[Result] = controller.generateDDI("543212300016").apply(fakeAuthRequest.withJsonBody(ddiRequestJson))
+      val result: Future[Result] = controller.getInstructionsRequest("543212300016").apply(fakeAuthRequest.withJsonBody(ddiRequestJson))
       val bodyText: String = contentAsString(result)
       status(result) mustBe OK
       bodyText mustBe emptyDDIResponse
     }
 
     "return 201 for generate DDIPP with new bank details" in {
-      val result: Future[Result] = controller.generateDDIPP("1234567890").apply(fakeAuthRequest.withJsonBody(validNewDDIJson))
+      val result: Future[Result] = controller.generateDDIPP(randomUtr).apply(fakeAuthRequest.withJsonBody(validNewDDIJson))
       val bodyText: String = contentAsString(result)
       status(result) mustBe CREATED
       bodyText mustBe ddiPPResponse
     }
 
     "return 201 for generate DDIPP with existing bank details" in {
-      val result: Future[Result] = controller.generateDDIPP("1234567890").apply(fakeAuthRequest.withJsonBody(validExistingDDI))
+      val result: Future[Result] = controller.generateDDIPP(randomUtr).apply(fakeAuthRequest.withJsonBody(validExistingDDI))
       val bodyText: String = contentAsString(result)
       status(result) mustBe CREATED
       bodyText mustBe ddiPPResponse
@@ -96,7 +99,7 @@ class DirectDebitStubControllerSpec extends PlaySpec with Results {
       val requiredRequest = ddiRequest.copy(knownFact = None)
       val requiredJson = Json.toJson(requiredRequest)
 
-      val result: Future[Result] = controller.generateDDI("1234567890").apply(fakeAuthRequest.withJsonBody(requiredJson))
+      val result: Future[Result] = controller.getInstructionsRequest(randomUtr).apply(fakeAuthRequest.withJsonBody(requiredJson))
       val bodyText: String = contentAsString(result)
       status(result) mustBe OK
       bodyText mustBe ddiResponse
@@ -106,7 +109,7 @@ class DirectDebitStubControllerSpec extends PlaySpec with Results {
       val requiredRequest = ddiRequest.copy(knownFact = None)
       val requiredJson = Json.toJson(requiredRequest)
 
-      val result: Future[Result] = controller.generateDDI("543212300016").apply(fakeAuthRequest.withJsonBody(requiredJson))
+      val result: Future[Result] = controller.getInstructionsRequest("543212300016").apply(fakeAuthRequest.withJsonBody(requiredJson))
       val bodyText: String = contentAsString(result)
       status(result) mustBe OK
       bodyText mustBe emptyDDIResponse
@@ -116,7 +119,7 @@ class DirectDebitStubControllerSpec extends PlaySpec with Results {
       val requiredRequest = ddiRequest.copy(knownFact = Some(List.empty))
       val requiredJson = Json.toJson(requiredRequest)
 
-      val result: Future[Result] = controller.generateDDI("1234567890").apply(fakeAuthRequest.withJsonBody(requiredJson))
+      val result: Future[Result] = controller.getInstructionsRequest(randomUtr).apply(fakeAuthRequest.withJsonBody(requiredJson))
       val bodyText: String = contentAsString(result)
       status(result) mustBe OK
       bodyText mustBe ddiResponse
@@ -126,7 +129,7 @@ class DirectDebitStubControllerSpec extends PlaySpec with Results {
       val requiredRequest = ddiRequest.copy(knownFact = Some(List.empty))
       val requiredJson = Json.toJson(requiredRequest)
 
-      val result: Future[Result] = controller.generateDDI("543212300016").apply(fakeAuthRequest.withJsonBody(requiredJson))
+      val result: Future[Result] = controller.getInstructionsRequest("543212300016").apply(fakeAuthRequest.withJsonBody(requiredJson))
       val bodyText: String = contentAsString(result)
       status(result) mustBe OK
       bodyText mustBe emptyDDIResponse
@@ -136,7 +139,7 @@ class DirectDebitStubControllerSpec extends PlaySpec with Results {
       val requiredRequest = ddiRequest.copy(requestingService = "")
       val requiredJson = Json.toJson(requiredRequest)
 
-      val result: Future[Result] = controller.generateDDI("1234567890").apply(fakeAuthRequest.withJsonBody(requiredJson))
+      val result: Future[Result] = controller.getInstructionsRequest(randomUtr).apply(fakeAuthRequest.withJsonBody(requiredJson))
       val bodyText: String = contentAsString(result)
       status(result) mustBe BAD_REQUEST
       bodyText must include("Your submission contains one or more errors")
@@ -147,7 +150,7 @@ class DirectDebitStubControllerSpec extends PlaySpec with Results {
       val requiredRequest = ddiRequest.copy(knownFact = Some(List(knownFact)))
       val requiredJson = Json.toJson(requiredRequest)
 
-      val result: Future[Result] = controller.generateDDI("1234567890").apply(fakeAuthRequest.withJsonBody(requiredJson))
+      val result: Future[Result] = controller.getInstructionsRequest(randomUtr).apply(fakeAuthRequest.withJsonBody(requiredJson))
       val bodyText: String = contentAsString(result)
       status(result) mustBe BAD_REQUEST
       bodyText must include("Your submission contains one or more errors")
@@ -158,7 +161,7 @@ class DirectDebitStubControllerSpec extends PlaySpec with Results {
       val requiredRequest = ddiRequest.copy(knownFact = Some(List(knownFact)))
       val requiredJson = Json.toJson(requiredRequest)
 
-      val result: Future[Result] = controller.generateDDI("543212300016").apply(fakeAuthRequest.withJsonBody(requiredJson))
+      val result: Future[Result] = controller.getInstructionsRequest("543212300016").apply(fakeAuthRequest.withJsonBody(requiredJson))
       val bodyText: String = contentAsString(result)
       status(result) mustBe BAD_REQUEST
       bodyText must include("Your submission contains one or more errors")
@@ -168,7 +171,7 @@ class DirectDebitStubControllerSpec extends PlaySpec with Results {
       val requiredRequest = validNewDDI.copy(requestingService = "")
       val requiredJson = Json.toJson(requiredRequest)
 
-      val result: Future[Result] = controller.generateDDIPP("1234567890").apply(fakeAuthRequest.withJsonBody(requiredJson))
+      val result: Future[Result] = controller.generateDDIPP(randomUtr).apply(fakeAuthRequest.withJsonBody(requiredJson))
       val bodyText: String = contentAsString(result)
       status(result) mustBe BAD_REQUEST
       bodyText must include("Your submission contains one or more errors")
@@ -178,7 +181,7 @@ class DirectDebitStubControllerSpec extends PlaySpec with Results {
       val requiredRequest = validNewDDI.copy(knownFact = List.empty)
       val requiredJson = Json.toJson(requiredRequest)
 
-      val result: Future[Result] = controller.generateDDIPP("1234567890").apply(fakeAuthRequest.withJsonBody(requiredJson))
+      val result: Future[Result] = controller.generateDDIPP(randomUtr).apply(fakeAuthRequest.withJsonBody(requiredJson))
       val bodyText: String = contentAsString(result)
       status(result) mustBe BAD_REQUEST
       bodyText must include("Your submission contains one or more errors")
@@ -189,7 +192,7 @@ class DirectDebitStubControllerSpec extends PlaySpec with Results {
       val requiredRequest = validNewDDI.copy(knownFact = List(knownFact))
       val requiredJson = Json.toJson(requiredRequest)
 
-      val result: Future[Result] = controller.generateDDIPP("1234567890").apply(fakeAuthRequest.withJsonBody(requiredJson))
+      val result: Future[Result] = controller.generateDDIPP(randomUtr).apply(fakeAuthRequest.withJsonBody(requiredJson))
       val bodyText: String = contentAsString(result)
       status(result) mustBe BAD_REQUEST
       bodyText must include("Your submission contains one or more errors")
@@ -200,7 +203,7 @@ class DirectDebitStubControllerSpec extends PlaySpec with Results {
       val requiredRequest = validNewDDI.copy(knownFact = List(knownFact))
       val requiredJson = Json.toJson(requiredRequest)
 
-      val result: Future[Result] = controller.generateDDIPP("1234567890").apply(fakeAuthRequest.withJsonBody(requiredJson))
+      val result: Future[Result] = controller.generateDDIPP(randomUtr).apply(fakeAuthRequest.withJsonBody(requiredJson))
       val bodyText: String = contentAsString(result)
       status(result) mustBe BAD_REQUEST
       bodyText must include("Your submission contains one or more errors")
@@ -211,7 +214,7 @@ class DirectDebitStubControllerSpec extends PlaySpec with Results {
       val requiredRequest = validNewDDI.copy(directDebitInstruction = ddi)
       val requiredJson = Json.toJson(requiredRequest)
 
-      val result: Future[Result] = controller.generateDDIPP("1234567890").apply(fakeAuthRequest.withJsonBody(requiredJson))
+      val result: Future[Result] = controller.generateDDIPP(randomUtr).apply(fakeAuthRequest.withJsonBody(requiredJson))
       val bodyText: String = contentAsString(result)
       status(result) mustBe BAD_REQUEST
       bodyText must include("Your submission contains one or more errors")
@@ -222,7 +225,7 @@ class DirectDebitStubControllerSpec extends PlaySpec with Results {
       val requiredRequest = validNewDDI.copy(directDebitInstruction = ddi)
       val requiredJson = Json.toJson(requiredRequest)
 
-      val result: Future[Result] = controller.generateDDIPP("1234567890").apply(fakeAuthRequest.withJsonBody(requiredJson))
+      val result: Future[Result] = controller.generateDDIPP(randomUtr).apply(fakeAuthRequest.withJsonBody(requiredJson))
       val bodyText: String = contentAsString(result)
       status(result) mustBe BAD_REQUEST
       bodyText must include("Your submission contains one or more errors")
@@ -233,7 +236,7 @@ class DirectDebitStubControllerSpec extends PlaySpec with Results {
       val requiredRequest = validNewDDI.copy(directDebitInstruction = ddi)
       val requiredJson = Json.toJson(requiredRequest)
 
-      val result: Future[Result] = controller.generateDDIPP("1234567890").apply(fakeAuthRequest.withJsonBody(requiredJson))
+      val result: Future[Result] = controller.generateDDIPP(randomUtr).apply(fakeAuthRequest.withJsonBody(requiredJson))
       val bodyText: String = contentAsString(result)
       status(result) mustBe BAD_REQUEST
       bodyText must include("Your submission contains one or more errors")
@@ -244,7 +247,7 @@ class DirectDebitStubControllerSpec extends PlaySpec with Results {
       val requiredRequest = validNewDDI.copy(directDebitInstruction = ddi)
       val requiredJson = Json.toJson(requiredRequest)
 
-      val result: Future[Result] = controller.generateDDIPP("1234567890").apply(fakeAuthRequest.withJsonBody(requiredJson))
+      val result: Future[Result] = controller.generateDDIPP(randomUtr).apply(fakeAuthRequest.withJsonBody(requiredJson))
       val bodyText: String = contentAsString(result)
       status(result) mustBe BAD_REQUEST
       bodyText must include("Your submission contains one or more errors")
@@ -255,7 +258,7 @@ class DirectDebitStubControllerSpec extends PlaySpec with Results {
       val requiredRequest = validNewDDI.copy(paymentPlan = paymentPlan)
       val requiredJson = Json.toJson(requiredRequest)
 
-      val result: Future[Result] = controller.generateDDIPP("1234567890").apply(fakeAuthRequest.withJsonBody(requiredJson))
+      val result: Future[Result] = controller.generateDDIPP(randomUtr).apply(fakeAuthRequest.withJsonBody(requiredJson))
       val bodyText: String = contentAsString(result)
       status(result) mustBe BAD_REQUEST
       bodyText must include("Your submission contains one or more errors")
@@ -266,7 +269,7 @@ class DirectDebitStubControllerSpec extends PlaySpec with Results {
       val requiredRequest = validNewDDI.copy(paymentPlan = paymentPlan)
       val requiredJson = Json.toJson(requiredRequest)
 
-      val result: Future[Result] = controller.generateDDIPP("1234567890").apply(fakeAuthRequest.withJsonBody(requiredJson))
+      val result: Future[Result] = controller.generateDDIPP(randomUtr).apply(fakeAuthRequest.withJsonBody(requiredJson))
       val bodyText: String = contentAsString(result)
       status(result) mustBe BAD_REQUEST
       bodyText must include("Your submission contains one or more errors")
@@ -277,7 +280,7 @@ class DirectDebitStubControllerSpec extends PlaySpec with Results {
       val requiredRequest = validNewDDI.copy(paymentPlan = paymentPlan)
       val requiredJson = Json.toJson(requiredRequest)
 
-      val result: Future[Result] = controller.generateDDIPP("1234567890").apply(fakeAuthRequest.withJsonBody(requiredJson))
+      val result: Future[Result] = controller.generateDDIPP(randomUtr).apply(fakeAuthRequest.withJsonBody(requiredJson))
       val bodyText: String = contentAsString(result)
       status(result) mustBe BAD_REQUEST
       bodyText must include("Your submission contains one or more errors")
@@ -288,7 +291,7 @@ class DirectDebitStubControllerSpec extends PlaySpec with Results {
       val requiredRequest = validNewDDI.copy(paymentPlan = paymentPlan)
       val requiredJson = Json.toJson(requiredRequest)
 
-      val result: Future[Result] = controller.generateDDIPP("1234567890").apply(fakeAuthRequest.withJsonBody(requiredJson))
+      val result: Future[Result] = controller.generateDDIPP(randomUtr).apply(fakeAuthRequest.withJsonBody(requiredJson))
       val bodyText: String = contentAsString(result)
       status(result) mustBe BAD_REQUEST
       bodyText must include("Your submission contains one or more errors")
@@ -299,7 +302,7 @@ class DirectDebitStubControllerSpec extends PlaySpec with Results {
       val requiredRequest = validNewDDI.copy(paymentPlan = paymentPlan)
       val requiredJson = Json.toJson(requiredRequest)
 
-      val result: Future[Result] = controller.generateDDIPP("1234567890").apply(fakeAuthRequest.withJsonBody(requiredJson))
+      val result: Future[Result] = controller.generateDDIPP(randomUtr).apply(fakeAuthRequest.withJsonBody(requiredJson))
       val bodyText: String = contentAsString(result)
       status(result) mustBe BAD_REQUEST
       bodyText must include("Your submission contains one or more errors")
@@ -310,7 +313,7 @@ class DirectDebitStubControllerSpec extends PlaySpec with Results {
       val requiredRequest = validNewDDI.copy(paymentPlan = paymentPlan)
       val requiredJson = Json.toJson(requiredRequest)
 
-      val result: Future[Result] = controller.generateDDIPP("1234567890").apply(fakeAuthRequest.withJsonBody(requiredJson))
+      val result: Future[Result] = controller.generateDDIPP(randomUtr).apply(fakeAuthRequest.withJsonBody(requiredJson))
       val bodyText: String = contentAsString(result)
       status(result) mustBe BAD_REQUEST
       bodyText must include("Your submission contains one or more errors")
@@ -321,7 +324,7 @@ class DirectDebitStubControllerSpec extends PlaySpec with Results {
       val requiredRequest = validNewDDI.copy(paymentPlan = paymentPlan)
       val requiredJson = Json.toJson(requiredRequest)
 
-      val result: Future[Result] = controller.generateDDIPP("1234567890").apply(fakeAuthRequest.withJsonBody(requiredJson))
+      val result: Future[Result] = controller.generateDDIPP(randomUtr).apply(fakeAuthRequest.withJsonBody(requiredJson))
       val bodyText: String = contentAsString(result)
       status(result) mustBe BAD_REQUEST
       bodyText must include("Your submission contains one or more errors")
@@ -332,7 +335,7 @@ class DirectDebitStubControllerSpec extends PlaySpec with Results {
       val requiredRequest = validNewDDI.copy(paymentPlan = paymentPlan)
       val requiredJson = Json.toJson(requiredRequest)
 
-      val result: Future[Result] = controller.generateDDIPP("1234567890").apply(fakeAuthRequest.withJsonBody(requiredJson))
+      val result: Future[Result] = controller.generateDDIPP(randomUtr).apply(fakeAuthRequest.withJsonBody(requiredJson))
       val bodyText: String = contentAsString(result)
       status(result) mustBe BAD_REQUEST
       bodyText must include("Your submission contains one or more errors")
@@ -343,7 +346,7 @@ class DirectDebitStubControllerSpec extends PlaySpec with Results {
       val requiredRequest = validNewDDI.copy(paymentPlan = paymentPlan)
       val requiredJson = Json.toJson(requiredRequest)
 
-      val result: Future[Result] = controller.generateDDIPP("1234567890").apply(fakeAuthRequest.withJsonBody(requiredJson))
+      val result: Future[Result] = controller.generateDDIPP(randomUtr).apply(fakeAuthRequest.withJsonBody(requiredJson))
       val bodyText: String = contentAsString(result)
       status(result) mustBe BAD_REQUEST
       bodyText must include("Your submission contains one or more errors")
@@ -354,7 +357,7 @@ class DirectDebitStubControllerSpec extends PlaySpec with Results {
       val requiredRequest = validNewDDI.copy(paymentPlan = paymentPlan)
       val requiredJson = Json.toJson(requiredRequest)
 
-      val result: Future[Result] = controller.generateDDIPP("1234567890").apply(fakeAuthRequest.withJsonBody(requiredJson))
+      val result: Future[Result] = controller.generateDDIPP(randomUtr).apply(fakeAuthRequest.withJsonBody(requiredJson))
       val bodyText: String = contentAsString(result)
       status(result) mustBe BAD_REQUEST
       bodyText must include("Your submission contains one or more errors")
@@ -365,7 +368,7 @@ class DirectDebitStubControllerSpec extends PlaySpec with Results {
       val requiredRequest = validNewDDI.copy(paymentPlan = paymentPlan)
       val requiredJson = Json.toJson(requiredRequest)
 
-      val result: Future[Result] = controller.generateDDIPP("1234567890").apply(fakeAuthRequest.withJsonBody(requiredJson))
+      val result: Future[Result] = controller.generateDDIPP(randomUtr).apply(fakeAuthRequest.withJsonBody(requiredJson))
       val bodyText: String = contentAsString(result)
       status(result) mustBe BAD_REQUEST
       bodyText must include("Your submission contains one or more errors")
@@ -376,7 +379,7 @@ class DirectDebitStubControllerSpec extends PlaySpec with Results {
       val requiredRequest = validNewDDI.copy(paymentPlan = paymentPlan)
       val requiredJson = Json.toJson(requiredRequest)
 
-      val result: Future[Result] = controller.generateDDIPP("1234567890").apply(fakeAuthRequest.withJsonBody(requiredJson))
+      val result: Future[Result] = controller.generateDDIPP(randomUtr).apply(fakeAuthRequest.withJsonBody(requiredJson))
       val bodyText: String = contentAsString(result)
       status(result) mustBe BAD_REQUEST
       bodyText must include("Your submission contains one or more errors")
@@ -387,7 +390,7 @@ class DirectDebitStubControllerSpec extends PlaySpec with Results {
       val requiredRequest = validNewDDI.copy(paymentPlan = paymentPlan)
       val requiredJson = Json.toJson(requiredRequest)
 
-      val result: Future[Result] = controller.generateDDIPP("1234567890").apply(fakeAuthRequest.withJsonBody(requiredJson))
+      val result: Future[Result] = controller.generateDDIPP(randomUtr).apply(fakeAuthRequest.withJsonBody(requiredJson))
       val bodyText: String = contentAsString(result)
       status(result) mustBe BAD_REQUEST
       bodyText must include("Your submission contains one or more errors")
@@ -398,7 +401,7 @@ class DirectDebitStubControllerSpec extends PlaySpec with Results {
       val requiredRequest = validNewDDI.copy(paymentPlan = paymentPlan)
       val requiredJson = Json.toJson(requiredRequest)
 
-      val result: Future[Result] = controller.generateDDIPP("1234567890").apply(fakeAuthRequest.withJsonBody(requiredJson))
+      val result: Future[Result] = controller.generateDDIPP(randomUtr).apply(fakeAuthRequest.withJsonBody(requiredJson))
       val bodyText: String = contentAsString(result)
       status(result) mustBe BAD_REQUEST
       bodyText must include("Your submission contains one or more errors")
