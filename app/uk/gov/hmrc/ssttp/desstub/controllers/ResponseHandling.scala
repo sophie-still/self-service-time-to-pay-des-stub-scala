@@ -92,7 +92,7 @@ object ResponseHandling {
   }
 
   def saAction(utr: String)(block: Request[AnyContent] => Result): Action[AnyContent] =
-    (requireAuthorisation andThen verifyUtr(utr)) (Action { request => block(request) })
+    (requireAuthorisation compose verifyUtr(utr)) (Action { request => block(request) })
 
 }
 

@@ -66,7 +66,7 @@ class DirectDebitStubController @Inject()() extends BaseController {
       Unauthorized("No authorization header present")
     else
       credentialId.toLowerCase match {
-        case credId if !(credId.length >= 1 && credId.length <= 25) => yourSubmissionContainsErrors
+        case credId if !(credId.length >= 1 && credId.length <= 40) => yourSubmissionContainsErrors
         case "0000000000" => NotFound(errorResponse("BP not found", "002"))
         case _ =>
           request.body.asJson match {
