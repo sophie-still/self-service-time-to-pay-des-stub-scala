@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,9 @@
 
 package uk.gov.hmrc.selfservicetimetopaydesstubscala
 
+import com.typesafe.config.Config
+import play.api.{Configuration, Play}
+import play.api.Mode.Mode
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.http.hooks.{HttpHook, HttpHooks}
 import uk.gov.hmrc.play.audit.http.HttpAuditing
@@ -31,12 +34,28 @@ override val hooks = Seq(AuditingHook)
 }
 
 trait WSHttp extends HttpGet with WSGet with HttpPut with WSPut with HttpPost with WSPost with HttpDelete with WSDelete with Hooks with AppName
-object WSHttp extends WSHttp
+object WSHttp extends WSHttp {
+  override protected def configuration: Option[Config] = None
+
+  override protected def appNameConfiguration: Configuration = Play.current.configuration
+}
 
 object MicroserviceAuditConnector extends AuditConnector with RunMode{
   override lazy val auditingConfig = LoadAuditingConfig(s"auditing")
+
+  override protected def mode: Mode =  Play.current.mode
+
+  override protected def runModeConfiguration: Configuration =  Play.current.configuration
 }
 
 object MicroserviceAuthConnector extends AuthConnector with ServicesConfig with WSHttp{
   override val authBaseUrl = baseUrl("auth")
+
+  override protected def mode: Mode =  Play.current.mode
+
+  override protected def runModeConfiguration: Configuration =  Play.current.configuration
+
+  override protected def configuration: Option[Config] = None
+
+  override protected def appNameConfiguration: Configuration =  Play.current.configuration
 }
